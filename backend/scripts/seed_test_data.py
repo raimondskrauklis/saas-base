@@ -34,9 +34,7 @@ SEED_WORKSPACE_SLUG = "seed-workspace"
 
 
 def test_database_url() -> str:
-    from app.core.config import settings
-
-    url = os.environ.get("TEST_DATABASE_URL") or settings.test_database_url
+    url = os.environ.get("TEST_DATABASE_URL")
     if not url or not str(url).strip():
         raise SystemExit("TEST_DATABASE_URL is required")
     return str(url).strip()

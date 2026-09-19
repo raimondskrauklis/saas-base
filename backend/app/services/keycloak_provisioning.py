@@ -8,17 +8,19 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from sqlalchemy import delete
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.constants.enums import PlatformRole, UserStatus
+from app.constants.enums import AppRole, PlatformRole, UserStatus, WorkspaceStatus
 from app.core.config import settings
 from app.core.exceptions import ConflictError, UnauthorizedError
 from app.core.logging import get_logger
 from app.core.sqlalchemy_errors import is_unique_violation
 from app.models.users import UserORM
 from app.models.workspace_memberships import WorkspaceMembershipORM
+from app.models.workspaces import WorkspaceORM
+from app.services.memberships import _count_workspace_admins
 from app.services.onboarding import (
     maybe_auto_provision_user,
     resolve_initial_user_status,
@@ -87,6 +89,38 @@ async def _find_bootstrap_seed(session: AsyncSession, email: str) -> UserORM | N
     return seeded
 
 
+async def _apply_live_identity(
+    session: AsyncSession,
+    user: UserORM,
+    *,
+    sub: str,
+    email: str | None,
+    email_verified: bool,
+    display_name: str | None,
+) -> UserORM:
+    if user.status == UserStatus.deleted:
+        return user
+    if email and email.strip():
+        await _sync_user_email(
+            session,
+            user,
+            normalize_email(email),
+            email_verified=email_verified,
+        )
+    if display_name:
+        name = display_name.strip()
+        if name and user.full_name != name:
+            user.full_name = name
+            await session.flush()
+    user = await maybe_auto_provision_user(
+        session,
+        user,
+        display_name=display_name,
+        email_verified=email_verified,
+    )
+    return await activate_bootstrap_super_admin(session, user, sub=sub)
+
+
 async def provision_user_from_keycloak(
     session: AsyncSession,
     *,
@@ -100,23 +134,14 @@ async def provision_user_from_keycloak(
     has_email = bool(email and email.strip())
 
     if user is not None:
-        if user.status == UserStatus.deleted:
-            return user
-        if has_email:
-            normalized = normalize_email(email)
-            await _sync_user_email(session, user, normalized, email_verified=email_verified)
-        if display_name:
-            name = display_name.strip()
-            if name and user.full_name != name:
-                user.full_name = name
-                await session.flush()
-        user = await maybe_auto_provision_user(
+        return await _apply_live_identity(
             session,
             user,
-            display_name=display_name,
+            sub=sub,
+            email=email,
             email_verified=email_verified,
+            display_name=display_name,
         )
-        return await activate_bootstrap_super_admin(session, user, sub=sub)
 
     if not has_email:
         raise UnauthorizedError(
@@ -152,12 +177,18 @@ async def provision_user_from_keycloak(
                     message="Email is already associated with another account",
                     error_code="identity_email_conflict",
                 ) from exc
-        user = existing
-    else:
-        logger.info(
-            "user_provisioned",
-            extra={"user_id": str(user.id), "operation": "provision_user_from_keycloak"},
+        return await _apply_live_identity(
+            session,
+            existing,
+            sub=sub,
+            email=email,
+            email_verified=email_verified,
+            display_name=display_name,
         )
+    logger.info(
+        "user_provisioned",
+        extra={"user_id": str(user.id), "operation": "provision_user_from_keycloak"},
+    )
 
     user = await maybe_auto_provision_user(
         session,
@@ -186,13 +217,46 @@ async def apply_keycloak_user_disabled(
     return user
 
 
+async def _release_workspace_on_identity_deleted(
+    session: AsyncSession,
+    membership: WorkspaceMembershipORM,
+) -> None:
+    """KC DELETE cannot be blocked — transfer last admin or mark empty workspace deleted."""
+    workspace_id = membership.workspace_id
+    others = (
+        await session.scalars(
+            select(WorkspaceMembershipORM).where(
+                WorkspaceMembershipORM.workspace_id == workspace_id,
+                WorkspaceMembershipORM.user_id != membership.user_id,
+            )
+        )
+    ).all()
+    if not others:
+        workspace = await session.get(WorkspaceORM, workspace_id)
+        if workspace is not None and workspace.status != WorkspaceStatus.deleted:
+            workspace.status = WorkspaceStatus.deleted
+        await session.delete(membership)
+        return
+    if membership.role == AppRole.admin:
+        admin_count = await _count_workspace_admins(session, workspace_id=workspace_id)
+        if admin_count <= 1:
+            others[0].role = AppRole.admin
+    await session.delete(membership)
+
+
 async def apply_keycloak_user_deleted(session: AsyncSession, *, sub: str) -> UserORM | None:
     user = await get_user_by_keycloak_id(session, sub)
     if user is None:
         return None
+    memberships = (
+        await session.scalars(
+            select(WorkspaceMembershipORM).where(WorkspaceMembershipORM.user_id == user.id)
+        )
+    ).all()
+    for membership in memberships:
+        await _release_workspace_on_identity_deleted(session, membership)
     user.status = UserStatus.deleted
     user.email = f"deleted+{user.id}@app.invalid"
     user.full_name = None
-    await session.execute(delete(WorkspaceMembershipORM).where(WorkspaceMembershipORM.user_id == user.id))
     await session.flush()
     return user

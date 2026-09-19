@@ -7,9 +7,11 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from sqlalchemy.exc import IntegrityError
 
-from app.constants.enums import PlatformRole, UserStatus
+from app.constants.enums import AppRole, PlatformRole, UserStatus, WorkspaceStatus
 from app.core.exceptions import ConflictError, UnauthorizedError
 from app.models.users import UserORM
+from app.models.workspace_memberships import WorkspaceMembershipORM
+from app.models.workspaces import WorkspaceORM
 from app.services.keycloak_provisioning import (
     apply_keycloak_user_deleted,
     provision_user_from_keycloak,
@@ -19,6 +21,14 @@ from app.services.users import BOOTSTRAP_KEYCLOAK_PLACEHOLDER
 
 class _PgUniqueViolation:
     pgcode = "23505"
+
+
+class _ScalarResult:
+    def __init__(self, rows: list[object]) -> None:
+        self._rows = rows
+
+    def all(self) -> list[object]:
+        return self._rows
 
 
 class _Nested:
@@ -191,6 +201,10 @@ async def test_provision_create_unique_violation_returns_existing_sub():
             new_callable=AsyncMock,
         ),
         patch(
+            "app.services.keycloak_provisioning._sync_user_email",
+            new_callable=AsyncMock,
+        ) as sync_email,
+        patch(
             "app.services.keycloak_provisioning.maybe_auto_provision_user",
             new_callable=AsyncMock,
             return_value=winner,
@@ -204,10 +218,11 @@ async def test_provision_create_unique_violation_returns_existing_sub():
         user = await provision_user_from_keycloak(
             session,
             sub="kc-new",
-            email="user@example.com",
+            email="new@example.com",
             email_verified=True,
         )
     assert user is winner
+    sync_email.assert_awaited()
 
 
 @pytest.mark.asyncio
@@ -401,7 +416,7 @@ async def test_provisioned_user_can_accept_invitation():
 @pytest.mark.asyncio
 async def test_apply_keycloak_user_deleted_anonymizes_and_drops_memberships():
     session = _session_with_flush()
-    session.execute = AsyncMock()
+    session.scalars = AsyncMock(return_value=_ScalarResult([]))
     user = UserORM(
         keycloak_user_id="kc-1",
         email="user@example.com",
@@ -421,7 +436,38 @@ async def test_apply_keycloak_user_deleted_anonymizes_and_drops_memberships():
     assert user.email == f"deleted+{user.id}@app.invalid"
     assert user.full_name is None
     assert user.keycloak_user_id == "kc-1"
-    session.execute.assert_awaited()
+
+
+@pytest.mark.asyncio
+async def test_apply_keycloak_user_deleted_marks_empty_workspace_deleted():
+    session = _session_with_flush()
+    user = UserORM(
+        keycloak_user_id="kc-1",
+        email="user@example.com",
+        status=UserStatus.active,
+    )
+    user.id = uuid.uuid4()
+    workspace_id = uuid.uuid4()
+    membership = WorkspaceMembershipORM(
+        user_id=user.id,
+        workspace_id=workspace_id,
+        role=AppRole.admin,
+    )
+    workspace = WorkspaceORM(slug="solo", name="Solo", status=WorkspaceStatus.active)
+    workspace.id = workspace_id
+    session.scalars = AsyncMock(
+        side_effect=[_ScalarResult([membership]), _ScalarResult([])],
+    )
+    session.get = AsyncMock(return_value=workspace)
+    session.delete = AsyncMock()
+    with patch(
+        "app.services.keycloak_provisioning.get_user_by_keycloak_id",
+        new_callable=AsyncMock,
+        return_value=user,
+    ):
+        await apply_keycloak_user_deleted(session, sub="kc-1")
+    assert workspace.status == WorkspaceStatus.deleted
+    session.delete.assert_awaited()
 
 
 @pytest.mark.asyncio

@@ -70,15 +70,18 @@ async def async_client(db_session: AsyncSession, seed_current_user: CurrentUser)
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         yield client
-    app.dependency_overrides.clear()
+    app.dependency_overrides.pop(get_db, None)
+    app.dependency_overrides.pop(get_current_user, None)
 
 
 @pytest.fixture
 async def anonymous_client():
     from app.main import app
 
+    original = app.dependency_overrides.copy()
     app.dependency_overrides.clear()
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         yield client
     app.dependency_overrides.clear()
+    app.dependency_overrides.update(original)
