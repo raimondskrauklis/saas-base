@@ -1,0 +1,80 @@
+{
+  "pack_version": "2",
+  "project_name": "saas-base",
+  "docs_root": "docs",
+  "agents_docs": "docs/agents",
+  "backend_dir": "backend",
+  "frontend_dir": "frontend",
+  "default_scope": ["backend/**"],
+  "scopes": {
+    "layout": "FastAPI backend/ + React frontend/ + Keycloak in deploy/. After P0 import from saas-base-v1.1.",
+    "default": ["backend/**"],
+    "available": ["backend/**", "frontend/**", "deploy/**"],
+    "note": "Default one primary glob (backend). Full-stack programs add frontend/** in review-context programs[].scope."
+  },
+  "pack_source": {
+    "kind": "sibling",
+    "path": "../agent-workflow",
+    "url": null,
+    "pack_version": "2"
+  },
+  "hosting": {
+    "kind": "github",
+    "pr_tool": "gh",
+    "review_bot": null,
+    "note": "Private raimondskrauklis/saas-base. GitHub without Revy. Origin may be added in P0; do not assume it exists before then. No Revy poll loops."
+  },
+  "test_commands": {
+    "backend_lint": "cd backend && pipenv run ruff check --fix . && pipenv run ruff check .",
+    "backend_test": "cd backend && pipenv run pytest tests/unit/ -q",
+    "frontend_lint": "cd frontend && npm run lint",
+    "frontend_test": "cd frontend && npm test"
+  },
+  "review_context": {
+    "ssot": ".agent/review-context.json",
+    "product_mirror": null,
+    "bugbot": ".cursor/BUGBOT.md",
+    "rule_packs": null
+  },
+  "integrations": {
+    "revy": false
+  },
+  "flows": {
+    "phase-loop": {
+      "enabled": true,
+      "skill": "phase-execution"
+    },
+    "ship": {
+      "enabled": true,
+      "skill": "ship-changes"
+    },
+    "revy-babysit": {
+      "enabled": false,
+      "skill": "babysit-revy-pr",
+      "note": "This template is not Revy and PRs will not run Revy."
+    }
+  },
+  "skills": {
+    "catalog": ".agent/skills.catalog.json",
+    "installed": [
+      "bootstrap-workflow",
+      "phase-execution",
+      "ship-changes",
+      "chunk-execution",
+      "create-findings",
+      "create-general-plan",
+      "create-execution-plan",
+      "architecture-peer-review",
+      "execution-peer-review",
+      "devils-advocate",
+      "post-finish-gap-pass"
+    ]
+  },
+  "validation": {
+    "index_doc": null,
+    "memo_pattern": null,
+    "template_pack_path": null,
+    "metrics_scripts": [],
+    "evidence_runbook": null
+  }
+}

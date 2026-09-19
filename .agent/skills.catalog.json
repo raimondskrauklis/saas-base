@@ -1,0 +1,155 @@
+{
+  "pack_version": "2",
+  "description": "Master skill inventory for agent-workflow. Bootstrap copies to .agent/skills.catalog.json and audits the target repo.",
+  "tiers": {
+    "meta": "Install / upgrade this pack in a repo",
+    "core": "Default LOOP and ship — install on almost every repo",
+    "planning": "Findings → general plan → execution — program work",
+    "optional_revy": "Post-push Revy — only when GitHub PRs run Revy",
+    "optional_sentry": "Sentry MCP debugging — manual, user points at one issue",
+    "optional_docs": "Markdown / mermaid / Word handoff",
+    "optional_validation": "Staging validation memos — on user demand"
+  },
+  "skills": [
+    {
+      "id": "bootstrap-workflow",
+      "tier": "meta",
+      "default_install": true,
+      "copy_scripts": false,
+      "when": "Install or upgrade this pack in a target repo"
+    },
+    {
+      "id": "phase-execution",
+      "tier": "core",
+      "default_install": true,
+      "copy_scripts": false,
+      "when": "Full program LOOP — attach execution file or plan folder"
+    },
+    {
+      "id": "ship-changes",
+      "tier": "core",
+      "default_install": true,
+      "copy_scripts": false,
+      "when": "Ship ad-hoc work: Bugbot → commit → push/PR when hosting allows"
+    },
+    {
+      "id": "chunk-execution",
+      "tier": "core",
+      "default_install": true,
+      "copy_scripts": false,
+      "when": "One subphase only — user explicitly asks, not full LOOP"
+    },
+    {
+      "id": "create-findings",
+      "tier": "planning",
+      "default_install": false,
+      "install_when": "Repo runs phased programs with findings docs",
+      "copy_scripts": false,
+      "when": "Research topic, scope work before planning"
+    },
+    {
+      "id": "create-general-plan",
+      "tier": "planning",
+      "default_install": false,
+      "install_when": "Repo runs phased programs",
+      "copy_scripts": false,
+      "when": "Turn findings into phased GENERAL plan"
+    },
+    {
+      "id": "create-execution-plan",
+      "tier": "planning",
+      "default_install": false,
+      "install_when": "Repo runs phased programs",
+      "copy_scripts": false,
+      "when": "Write all per-phase execution files; inline LOOP ship gates"
+    },
+    {
+      "id": "architecture-peer-review",
+      "tier": "planning",
+      "default_install": false,
+      "install_when": "Repo uses findings/general plan peer review",
+      "copy_scripts": false,
+      "when": "Cross-check one findings, general, or design doc vs codebase"
+    },
+    {
+      "id": "execution-peer-review",
+      "tier": "planning",
+      "default_install": false,
+      "install_when": "Repo uses execution plans before LOOP",
+      "copy_scripts": false,
+      "when": "Read-only review of execution files P0…Pn before phase-execution"
+    },
+    {
+      "id": "devils-advocate",
+      "tier": "planning",
+      "default_install": false,
+      "install_when": "Repo stress-tests plans before build",
+      "copy_scripts": false,
+      "when": "Stress-test a plan or design doc"
+    },
+    {
+      "id": "post-finish-gap-pass",
+      "tier": "planning",
+      "default_install": false,
+      "install_when": "Repo uses phase-execution on multi-phase programs",
+      "copy_scripts": false,
+      "when": "Closeout — plan vs shipped, doc sync"
+    },
+    {
+      "id": "babysit-revy-pr",
+      "tier": "optional_revy",
+      "default_install": false,
+      "install_when": "hosting.kind is github AND (Revy on PRs or integrations.revy)",
+      "copy_scripts": false,
+      "when": "User asks: babysit revy — poll Revy check, fix revybot threads"
+    },
+    {
+      "id": "sentry-fix-issues",
+      "tier": "optional_sentry",
+      "default_install": false,
+      "install_when": "Sentry MCP configured in .cursor/mcp.json",
+      "copy_scripts": false,
+      "when": "User points at one Sentry issue URL/ID — manual only"
+    },
+    {
+      "id": "md-formatting",
+      "tier": "optional_docs",
+      "default_install": false,
+      "install_when": "Repo exports docs to Word/PDF or handoff MD",
+      "copy_scripts": false,
+      "when": "Fix markdown for GitHub + Pandoc export"
+    },
+    {
+      "id": "mermaid-diagrams",
+      "tier": "optional_docs",
+      "default_install": false,
+      "install_when": "Repo authors mermaid architecture or stakeholder diagrams",
+      "copy_scripts": false,
+      "when": "Create mermaid flowcharts with calm palette for Word/GitHub handoff"
+    },
+    {
+      "id": "md-docx-export",
+      "tier": "optional_docs",
+      "default_install": false,
+      "install_when": "Repo needs MD → Word export (Pandoc)",
+      "copy_scripts": true,
+      "when": "Export markdown to compact Word docx"
+    },
+    {
+      "id": "docx-md-export",
+      "tier": "optional_docs",
+      "default_install": false,
+      "install_when": "Repo ingests Word handoffs into docs/",
+      "copy_scripts": true,
+      "when": "Convert Word docx to GitHub-flavored markdown"
+    },
+    {
+      "id": "staging-validation",
+      "tier": "optional_validation",
+      "default_install": false,
+      "install_when": "integrations.revy OR *_STAGING_VALIDATION.md OR user asks",
+      "copy_scripts": false,
+      "when": "Create or update staging validation memo tables from evidence"
+    }
+  ]
+}

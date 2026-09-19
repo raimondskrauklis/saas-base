@@ -1,31 +1,55 @@
-# Agent guide — Revy
+# Agent guide — saas-base
 
-Entry point for AI agents working in this repo.
+Generic SaaS platform template (FastAPI + React + Keycloak). **Not** Revy.
 
-**Product:** Revy — AI-assisted code review on GitHub (starter-pack SaaS shell + Revy domain slice).
+Coding rules: [.cursorrules](.cursorrules) and `.cursor/rules/` from the frozen shell (keep; do not replace with kp-platform).
+
+## Agent workflow
+
+| Topic | File |
+|-------|------|
+| **Flow manifest** | [.agent/manifest.json](.agent/manifest.json) — `hosting`, `pack_source`, `default_scope` |
+| **Skill catalog** | [.agent/skills.catalog.json](.agent/skills.catalog.json) |
+| **Review context SSOT** | [.agent/review-context.json](.agent/review-context.json) |
+| **Orchestration** | [docs/agents/README.md](docs/agents/README.md) |
+| **Quick ref** | [docs/utils/CURSOR_AGENT_WORKFLOW.md](docs/utils/CURSOR_AGENT_WORKFLOW.md) |
+| **Bugbot (pre-push)** | [.cursor/BUGBOT.md](.cursor/BUGBOT.md) |
+| **Roles + verbs** | [docs/agents/prompts/ROLES.md](docs/agents/prompts/ROLES.md) |
+
+Active LOOP program: see review-context SSOT → `active_program` (`null` when idle).
+
+**LOOP contract:** The agent **executes until the program is done**. Do **not** ask “Continue?”. Local commit every phase. Honour `hosting.kind` — GitHub PRs via `gh` after a remote exists; **no Revy**. **Only pause:** migration subphase.
+
+Read **only** the current `*_Pn_EXECUTION.md`.
+
+### Skills (installed)
+
+| Tier | Skills |
+|------|--------|
+| **Meta** | `bootstrap-workflow` |
+| **Core** | `phase-execution`, `ship-changes`, `chunk-execution` |
+| **Planning** | `create-findings`, `create-general-plan`, `create-execution-plan`, `architecture-peer-review`, `execution-peer-review`, `devils-advocate`, `post-finish-gap-pass` |
+
+Not installed: `babysit-revy-pr` (GitHub without Revy), Sentry, docs export, staging-validation.
+
+**Default gate:** local Bugbot before every ship.
+
+**Pack:** sibling `../agent-workflow`. Re-audit: invoke `bootstrap-workflow`.
 
 ## Read first
 
 | Topic | Where |
 |-------|--------|
+| **Platform-base program** | [docs/README.md](docs/README.md) |
 | **Dev bootstrap** | [docs/starter-pack/DEV_BOOTSTRAP.md](docs/starter-pack/DEV_BOOTSTRAP.md) |
 | **Keycloak (dev/prod)** | [docs/starter-pack/KEYCLOAK_DEV_CHECKLIST.md](docs/starter-pack/KEYCLOAK_DEV_CHECKLIST.md) |
 | **Registration flags** | [docs/starter-pack/REGISTRATION_FLAGS.md](docs/starter-pack/REGISTRATION_FLAGS.md) |
-| **Revy product slice (P4)** | [docs/starter-pack/REVY_PRODUCT_SLICE.md](docs/starter-pack/REVY_PRODUCT_SLICE.md) |
-| **SaaS base program (W0–W8)** | [docs/saas-base/README.md](docs/saas-base/README.md) — tag `saas-base-v1` |
-| **Review pipeline program (R0–R7)** | [docs/review-pipeline/README.md](docs/review-pipeline/README.md) — **active**; R0 execution ready |
-| **SaaS ops / staging** | [STAGING_VERIFICATION.md](docs/saas-base/STAGING_VERIFICATION.md), [OPS.md](docs/saas-base/OPS.md) |
+| **SaaS base (W0–W8, already in the shell)** | [docs/saas-base/README.md](docs/saas-base/README.md) |
+| **Scaffold runbooks** | [docs/starter-pack/README.md](docs/starter-pack/README.md) |
 | **Stripe billing setup** | [docs/utils/STRIPE_BILLING_SETUP.md](docs/utils/STRIPE_BILLING_SETUP.md) |
-| **Scaffold program status** | [docs/starter-pack/README.md](docs/starter-pack/README.md) |
-| **Product context (full)** | `internal-docs/product/revy/docs/PLATFORM_CONTEXT.md` |
-| **Architecture (full)** | `internal-docs/product/revy/docs/architecture.md` |
-| **Starter-pack backend patterns** | `internal-docs/starter-pack/docs/backend/AGENT_PATTERNS.md` |
-| **Starter-pack frontend drift** | `internal-docs/starter-pack/docs/frontend/patterns/AGENT_DRIFT.md` |
-| **Auth / JWKS** | `internal-docs/starter-pack/docs/backend/AUTH.md` |
-| **Deploy (Revy)** | `internal-docs/starter-pack/deploy/docs/implementation.md` + `internal-docs/product/revy/deploy/docs/implementation.revy.md` |
 | **Env examples** | `deploy/env-examples/`, `backend/.env.example`, `frontend/.env.example` |
 
-`internal-docs/` is gitignored — available to contributors with repo access.
+`internal-docs/` is gitignored and is **not** required to run this template.
 
 ## Cursor rules (modular)
 
@@ -39,19 +63,7 @@ Entry point for AI agents working in this repo.
 | `.cursor/rules/testing.mdc` | tests |
 | `.cursor/rules/sentry-mcp.mdc` | Sentry MCP — manual only |
 
-Root [`.cursorrules`](.cursorrules) is a short pointer.
-
-## Skills (Revy)
-
-| Skill | When |
-|-------|------|
-| `ship-changes` | Ship: branch, commit, push, PR |
-| `sentry-fix-issues` | User points at one Sentry issue URL/ID |
-| `phase-execution` | Full scaffold execution LOOP from `docs/starter-pack/SCAFFOLD_P*_EXECUTION.md` |
-| `chunk-execution` | One scaffold subphase only |
-| `babysit-pr` | Triage/fix Greptile review comments on an open PR |
-
-Scaffold planning skills (`create-findings`, `create-general-plan`, `create-execution-plan`, peer-review, `devils-advocate`, `post-finish-gap-pass`) apply to `docs/starter-pack/` program work only.
+Root [`.cursorrules`](.cursorrules) is a short pointer. Full Revy-string genericize is **P3**.
 
 ## Backend quick ref
 
@@ -67,7 +79,7 @@ Scaffold planning skills (`create-findings`, `create-general-plan`, `create-exec
 ## Frontend quick ref
 
 - Stack: React 19, TypeScript strict, Vite, Tailwind 4, TanStack Query, Zustand (UI only).
-- Tokens: `--app-*` in feature code; Revy brand via `frontend/src/styles/tokens.revy.css`.
+- Tokens: `--app-*` in feature code.
 - i18n: `t()` — EN + LV (`frontend/src/i18n/`).
 - Dates/numbers: `@/lib/date`, `@/lib/locale`, `@/lib/number`.
 - Inputs: `QuietInput`, `QuietSelect`, `QuietDateInput` from `@/components/ui/`.
@@ -85,11 +97,3 @@ pipenv install && pipenv run uvicorn app.main:app --reload
 # Frontend (from frontend/)
 npm install && npm run dev
 ```
-
-## CI / deploy
-
-PR + main: [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) (`CI/CD - Revy`). Set `SKIP_CI_TESTS: "false"` when Actions secrets are ready.
-
-## Sentry MCP
-
-Config: `.cursor/mcp.json` → `https://mcp.sentry.dev/mcp/kp-platform`. Manual debugging only — see `@sentry-fix-issues` skill.

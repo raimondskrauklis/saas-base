@@ -1,0 +1,15 @@
+{
+  "active_program": "platform-base",
+  "programs": [
+    {
+      "id": "platform-base",
+      "scope": ["backend/**", "frontend/**"],
+      "paths": [
+        { "path": "docs/README.md", "description": "execution" },
+        { "path": "docs/PLATFORM_BASE_FINDINGS.md", "description": "findings" },
+        { "path": "docs/PLATFORM_BASE_GENERAL_PLAN.md", "description": "general plan" }
+      ]
+    }
+  ],
+  "rule_packs_catalog": {}
+}

@@ -3,238 +3,213 @@ name: create-execution-plan
 description: >-
   Write all per-phase execution plan files from a GENERAL_PLAN in one pass (or
   one phase when updating): README execution table, 3–6 subphases each, phase
-  gates. Sized for phase-execution LOOP. Use when creating execution docs from
+  gates, self-contained LOOP ship gates. Use when creating execution docs from
   findings + general plan.
 ---
 
 # Create Execution Plan
 
-**Input:** baseline-ready findings + `*_GENERAL_PLAN.md` in a plan folder.
+**Input:** findings + `*_GENERAL_PLAN.md` in a plan folder.
 
-**Default output (full pass):** **every** execution file for **every** general-plan phase (P0…Pn or C0…Cn) + **`README.md` execution table** — all in **one session**, **no code**. This is the usual workflow after `create-general-plan`.
+**Output (one session, no code):** one `*_Pn_EXECUTION.md` per general-plan phase + README execution table.
 
-**Optional:** user says “P0 only” / “update P3 execution” → single file.
+**Next step after full pass:** user attaches the folder + `execution-peer-review`, then `phase-execution`.
 
-**Not:** one monolithic file for all phases (legacy `FRAMEWORK_CALLOFF_EXECUTION_PLAN.md`).
+The executing agent reads **only that phase file**. If a step is not in the file, they will skip it. **Paste a full ship gate — never “follow phase-execution” or “run Bugbot until clean”.**
 
-**Next step after full pass:** **`execution-peer-review`** → then user attaches plan folder + `phase-execution`.
-
----
-
-## Process
-
-### Full pass (default)
-
-1. Read `.cursorrules` (§2 migrations, §4 tests).
-2. Read findings + general plan; list every `## P0` / `## C0` … phase block.
-3. **README first:** add or update execution table with **all phases**, linear LOOP order, wave column if helpful.
-4. **For each phase in order:** write `<TOPIC>_P0_EXECUTION.md` … (one file per phase).
-5. **Peer review:** run **`execution-peer-review`** on the full set (one file at a time) before baseline-ready; fix findings, then re-review changed files only.
-6. Each file: 3–6 subphases, phase gate, locked decisions, out of scope, **Next** link. All decisions locked — no options, no TBDs. Unit tests only (`tests/unit/`).
-7. If general plan names a scope authority, link it in README + headers as `**Authority:**` (domain doc — not hardcoded in this skill).
-8. **Exit criteria** — list remaining gaps explicitly; do not defer mandatory GA items as “optional follow-up”.
-
-Do **not** stop after P0 unless the user asked for a single phase.
-
-### Single phase (override)
-
-User names one phase → write or update that execution file only; still update README row.
-
-### LOOP order vs parallel general plan
-
-General plan may allow parallel work (e.g. P1 ∥ P3 ∥ P4 after P0). **README execution table defines one linear order** for `phase-execution` commits. Typical pattern after parallel fork:
-
-`P0 → P1 → P3 → P4 → P2 → P5 → P6 → P7 → P8`
-
-Document depends-on in each file; order respects hard gates (e.g. P2 after P1 PASS).
+Read consumer `.agent/manifest.json` → `hosting` and `test_commands`. If `hosting.kind` is not `github`, paste ship-gate tails **without** `gh` / Revy: `first-push` and `batch` are `git push` when a remote exists, otherwise commit-only. Lint lines must use this repo's `test_commands`, not pipenv-by-default. P0.0 SSOT path is `manifest.review_context.ssot` (often `.agent/review-context.json`; `.revy/` only when that integration exists).
 
 ---
 
-## How big should a phase be?
+## Cadence (put this in the README Push column)
 
-**Target:** one phase = one focused agent session = one git commit in the LOOP.
+| Phase | `Push:` | What the ship gate must say |
+|-------|---------|-----------------------------|
+| P0 | `local` | Commit. Do not push. Open next file immediately. |
+| P1 | `first-push` | Commit. Push (opens PR, includes P0). Revy starts. Do **not** drain comments. Open next file. |
+| P2 … last-impl−1 | `local` | Commit. Do not push. Revy is running on the PR — leave it. |
+| Last impl, or last file if small program (~P3–P6) | `batch` | Commit this phase. Poll Revy idle. **Fetch all unresolved comments (including outdated). Fix what still applies to HEAD. Re-fetch once. Then one push** (fixes + unpushed work). Then WHILE on the new tip. |
 
-| Dimension | Guideline |
-|:---|:---|
-| **Subphases** | **3–6** (sweet spot). **Max 8.** More → split into two general-plan phases or two execution files (e.g. C2a/C2b) and update README. |
-| **Backend touch** | ~5–20 files typical; one coherent vertical slice (policy, API, scan path, UI drill). |
-| **Subphase size** | One subphase = one wiring site, one migration, one UI surface, or one test bundle — **one paragraph** max. |
-| **FE + BE** | Allowed in **one phase** when general plan says so — split subphases: API/read path → types → components → i18n/MSW (see `CPV2_MARKETS_C3_EXECUTION.md`). |
+Do not invent a fourth kind. Do not open the PR on P0. Do not push every phase.
 
-### Split into a new phase when
-
-- General-plan phase would exceed **6 subphases** or **~150 lines** of execution detail.
-- **Migration + wide refactor** in one breath — prefer migration subphase early or alone; `phase-execution` **pauses the LOOP** after a handwritten Alembic revision.
-- **Ops / prod / human sign-off** (rescan, probe on prod, econometrics Q6) — own phase or explicit **Human gate** (LOOP stops; code may still ship).
-- **Doc-only** closeout (validation memo, deploy note) — own phase (e.g. C4) or final subphase with human gate, not mixed with heavy code.
-- **Legacy monolith** (P1–P4 in one file) — split into `P1_EXECUTION.md` … when touching again.
-
-### Keep in one phase when
-
-- Same deploy unit (ship C0 with C1 — note in **Deploy** line, still **two commits** in LOOP).
-- Test-only parity phase (C2) — all subphases extend prior phase tests.
-- Shared constant/policy flip with wired sites (C0) — many files, few subphases.
+**Default closeout:** fold gap + doc sync into the **last** file (`Push: batch`). Write separate Revy / doc / gap files only when the general plan already lists them (large full-stack).
 
 ---
 
-## Plan folder layout (required for phase-execution)
+## Every execution file must contain
 
-```
-docs/<area>/<topic>/
-  README.md                    ← execution table + status
-  <TOPIC>_FINDINGS.md
-  <TOPIC>_GENERAL_PLAN.md
-  <TOPIC>_C0_EXECUTION.md      ← one per phase
-  <TOPIC>_C1_EXECUTION.md
-  ...
+1. Header: goal, **`Push:`** `local` | `first-push` | `batch`, locked decisions, out of scope, **Next** link (or **none**).
+2. Subphases (3–6): **What** / **Files** / **Deliverable** (exact test command). No `**Stop:**`. No open options.
+3. P0.0 on P0 only: wire `.revy/review-context.json` + `.cursor/BUGBOT.md` (one `programs[]` entry). Set `rule_packs` from `scope` (any `backend/` path including tests → `platform`+`backend`; any `frontend/` path → `platform`+`frontend`; both → all three; neither → `[]`). List pack files on `paths[]` with `description: "rules"`. Keep `rule_packs_catalog`. Do not ask which packs. Bugbot stays three program docs.
+4. Migration subphase: `hand-written only` + **`Pause LOOP` after this subphase** (only pause).
+5. **Phase gate:** copy-paste pytest / npm.
+6. **`## LOOP ship gate`:** paste **one** block below that matches `Push:`. Fill in commit message, test paths, Next file. Keep the REPEAT/WHILE text verbatim.
+
+Also write: *Do not ask Continue?. After each Deliverable, next heading. After the ship gate, open Next immediately.*
+
+---
+
+## Ship gates — paste one per file
+
+Shared prefix (every kind) — keep the REPEAT text:
+
+```text
+## LOOP ship gate
+
+Do not ask Continue?. After this gate, open the Next file immediately.
+Pause LOOP only if a subphase above said Pause LOOP (migration).
+
+1. Branch — not main
+2. Lint (from backend/: pipenv run ruff check --fix . && pipenv run ruff check .)
+3. Phase gate above — green
+4. Bugbot:
+REPEAT until Bugbot CLOSE:
+  1. Invoke review-bugbot (run_in_background: false)
+  2. Diff: uncommitted changes
+  3. Custom Instructions: VERB FIND + this phase locked decisions + .cursor/BUGBOT.md
+  4. Fix blockers; re-lint if code changed
+END REPEAT
+5. Commit: feat(<program-slug>): P<n> <short goal>
 ```
 
-**README.md** must include:
+Then **exactly one** tail:
 
-| Phase | File | Status |
-|:---|:---|:---|
-| C0 — short label | link | pending / Done (sha) |
+### Tail `local`
 
-Optional: closeout docs, deploy notes, artifact paths (see `cpv2_markets/README.md`).
+```text
+6. Do not push.
+7. Update README status row.
+8. Open Next immediately.
+```
 
-**Filename patterns:** `<TOPIC>_C0_EXECUTION.md`, `P7_signal_lifecycle_execution_plan.md`, `GRAPH_*_P3_EXECUTION.md` — phase id parseable from name or first heading.
+### Tail `first-push`
+
+```text
+6. No PR yet — skip Revy.
+7. Push (opens PR; includes P0 commit). Title: feat(<program-slug>): <outcome, not "P1">. Use ship-changes **from Push onward** (already committed — do not commit again).
+8. Confirm PR URL. Revy starts — do not fetch or fix comments yet.
+9. Open Next immediately.
+```
+
+### Tail `batch`
+
+```text
+6. Fetch Revy first (comments from the P1 PR — include outdated / unresolved, not only Files-changed):
+REPEAT until Revy status is NOT pending/in_progress/queued:
+  gh pr checks <PR> 2>&1 | grep -iE 'revy|Revy' || true
+  IF pending/in_progress/queued: poll again (do not push, do not ask)
+END REPEAT
+   gh pr view <PR> --comments
+   gh api repos/<owner>/<repo>/pulls/<PR>/comments --paginate --jq '.[] | select(.user.login|test("revy";"i"))'
+   Fix what still applies to current HEAD. Skip obsolete with a one-line note. Lint + Bugbot CLOSE. Commit Revy fixes.
+   Re-fetch comments once. If new actionable arrived: fix → lint + Bugbot CLOSE → commit (still the same upcoming push).
+7. One push: Revy fixes + this phase + any unpushed local commits. Never force-push. Never push while Revy is pending.
+8. After push, Revy reviews the combined tip (new cycle — required):
+WHILE actionable Revy comments OR Revy running after push:
+  fetch → fix → lint + gate → Bugbot until CLOSE → poll idle → commit → push → poll
+END WHILE
+9. Open Next immediately (or Next: none if this is the last file).
+```
+
+On the **last** file, add: clear `active_program` → `null` only after gap table has no fix-now rows. Keep `rule_packs_catalog`.
 
 ---
 
-## Execution file template
+## Body template (not a ship gate)
 
 ```markdown
-# docs/.../<TOPIC>_C0_EXECUTION.md
+# docs/.../<TOPIC>_P0_EXECUTION.md
 
-# C0 — <short title> (execution)
+# P0 — <title> (execution)
 
-Phase **C0** of [`<GENERAL_PLAN>.md`](./...). Baseline: [`<FINDINGS>.md`](./...) §…. **C0 only.**
+Phase **P0** of [`<GENERAL_PLAN>.md`](./...). Baseline: [`<FINDINGS>.md`](./...). **P0 only.**
 
 **Goal:** one line.
+**Push:** local
 
-## Decisions locked for C0
-- bullet decisions — no options downstream
+## Decisions locked for P0
+- locked bullets — no options
 
-## Out of scope for C0 (later phases)
-- item → **C1** / **C3**
+## Out of scope for P0
+- item → **P1**
 
----
+## P0.0 — Program PR review context
+**What:** `.revy/review-context.json` + `.cursor/BUGBOT.md`. One `programs[]` entry. `rule_packs` from any `backend/` / `frontend/` scope path. Pack files on `paths[]` (`description: "rules"`). Keep `rule_packs_catalog`. Bugbot: three program docs only. Do not ask which packs.
+**Files:** those two paths
+**Deliverable:** `python -m json.tool .revy/review-context.json`
 
-## C0.1 — <title>
+Example (backend-only):
 
-**What:** …
-
-**Files:** `backend/...` (paths only)
-
-**Deliverable:** assertion + **exact test command** (e.g. `pipenv run pytest tests/unit/...`)
-
-## C0.2 — …
-
----
-
-**Phase gate** (from `backend/`):
-
-\`\`\`bash
-pipenv run pytest tests/unit/...
-\`\`\`
-
-**Phase gate** (from `frontend/`) — when FE touched:
-
-\`\`\`bash
-npm test -- ComponentA ComponentB
-\`\`\`
-
-**Human gate:** (optional) — validation memo signed; prod rescan run. LOOP stops here even if tests pass.
-
-**Deploy:** coupling note (e.g. ship with C1 before prod).
-
-**Next:** [`<TOPIC>_C1_EXECUTION.md`](./...) — or **none** on final phase (must include doc sync — see below).
+```json
+{
+  "active_program": "<slug>",
+  "programs": [
+    {
+      "id": "<slug>",
+      "scope": ["backend/**"],
+      "rule_packs": ["platform", "backend"],
+      "paths": [
+        { "path": ".revy/rules/platform.md", "description": "rules" },
+        { "path": ".revy/rules/backend.md", "description": "rules" },
+        { "path": "docs/.../README.md", "description": "execution" },
+        { "path": "docs/.../FINDINGS.md", "description": "findings" },
+        { "path": "docs/.../GENERAL_PLAN.md", "description": "general plan" }
+      ]
+    }
+  ],
+  "rule_packs_catalog": {
+    "platform": ".revy/rules/platform.md",
+    "backend": ".revy/rules/backend.md",
+    "frontend": ".revy/rules/frontend.md"
+  }
+}
 ```
 
-### Required sections
+## P0.1 — …
+**What:** … (repeat the locked decision that applies here)
+**Files:** `backend/...`
+**Deliverable:** `cd backend && pipenv run pytest tests/unit/... -q`
 
-| Section | Purpose |
-|:---|:---|
-| Goal + locked decisions | No re-deciding in LOOP |
-| **Out of scope** | Hard boundary for agent |
-| Subphases `N.1`… | `**What**` / `**Files**` / `**Deliverable**` |
-| **Phase gate** | Copy-paste commands; agent runs before Bugbot/commit |
-| **Next** | Chain to following execution file — **none** on final phase |
+**Phase gate:** copy-paste pytest
 
-### Subphase rules
-
-- Use **`Deliverable`** (not `Verify`) — must name **how to verify** (pytest path, npm test pattern, or explicit assertion).
-- After each subphase in LOOP, agent runs that deliverable’s tests.
-- **Migration subphase:** name revision file; `hand-written only`; note LOOP pause after this subphase.
-- **No** scope tables, estimates, timelines, or open questions.
-
-### Phase gate rules
-
-- **Always** include at least one runnable gate block.
-- Backend: `cd backend && pipenv run pytest …` (enumerate files from subphases).
-- Frontend: `cd frontend && npm test -- …` when phase touches `frontend/`.
-- **Manual QA** / staging checks → label **non-gate** (do not block commit).
-- If phase is backend-only, do not require frontend gate.
-
----
-
-## Align with general plan
-
-| General plan | Execution |
-|:---|:---|
-| One `## C0` block | One `*_C0_EXECUTION.md` |
-| Phase goal / scope / depends | Header + out of scope |
-| Deliverables (outcomes) | Subphase deliverables (verifiable) |
-
-If general-plan phase is too large for sizing rules, **split the general plan first** (`create-general-plan`) — do not write a 12-subphase execution file.
-
----
-
-## Doc sync (final phase only)
-
-**Before doc-sync:** optional **`post-finish-gap-pass`** skill.
-
-Last phase **Pn** must include **one doc-sync subphase** (or companion `*_Pn_6_EXECUTION.md` if Pn is full — same commit).
-
-1. **README** — status Done + sha.
-2. **Affected docs** — grep siblings; deliverable: `| Doc | Change |` table (copy shape from [`STRUCTURAL_OUTLIER_INDICATOR_P6_6_EXECUTION.md`](../../docs/ML/structural_outlier_indicator/STRUCTURAL_OUTLIER_INDICATOR_P6_6_EXECUTION.md)).
-3. **Changelog** (user-facing only) — `frontend/src/data/changelog.json`: `**Bold name**`, what investigators see, advisory disclaimers; `python -m json.tool frontend/src/data/changelog.json > /dev/null`.
-
-P0…Pn-1: README status row only when that phase ships.
-
----
-
-## Anti-patterns (seen in repo)
-
-| Pattern | Problem | Fix |
-|:---|:---|:---|
-| `FRAMEWORK_CALLOFF_EXECUTION_PLAN.md` — P1–P4 in one file | LOOP cannot commit per phase | Split per phase + README |
-| `P0_foundations_execution_plan.md` — no **Phase gate** block | Agent derives gate; inconsistent | Add pytest block at end |
-| `P7_…` — no phase gate | Same | Add gate covering P7.1–P7.3 tests |
-| `market_ux_refine/` — no README | `phase-execution` cannot discover order | Add README table UX0–UX5 |
-| Subphase uses **Verify:** only | Inconsistent | Rename to **Deliverable:** + command |
-| Migration hidden inside big subphase | LOOP pause surprise | Dedicated migration subphase + callout |
-
-**Good references:** `docs/investigation/market_indicators/cpv2_markets/` (gates); `docs/ML/structural_outlier_indicator/STRUCTURAL_OUTLIER_INDICATOR_P6_6_EXECUTION.md` (doc-sync table).
-
----
-
-## Checklist before baseline-ready
-
-```
-- [ ] README.md execution table matches general plan phases
-- [ ] One execution file per phase; 3–6 subphases each
-- [ ] Each subphase: What / Files / Deliverable (with test command)
-- [ ] Out of scope + locked decisions
-- [ ] Phase gate block(s) — backend and/or frontend
-- [ ] Migration subphases flagged for LOOP pause
-- [ ] Human gate marked where ops/sign-off required
-- [ ] **Final phase:** doc-sync subphase (+ `changelog.json` if user-facing); optional `post-finish-gap-pass`
-- [ ] **`execution-peer-review`** on all files (one-by-one report) — no critical/high open
+## LOOP ship gate
+<paste prefix + `local` tail>
+**Next:** [`..._P1_EXECUTION.md`](./...)
 ```
 
-**Invoke with:**
+---
 
-- **Full pass (default):** “Create execution plans from general plan” + `@…/GRAPH_ML_CARTEL_GRAPH_GENERAL_PLAN.md` → all `*_P*_EXECUTION.md` + README table.
-- **Single phase:** “Create execution plan for P0 only”.
-- **Split legacy:** “Split FRAMEWORK_CALLOFF execution per phase”.
+## README
+
+| Phase | File | Push | Status |
+|:---|:---|:---|:---|
+| P0 — … | link | local | pending |
+| P1 — … | link | first-push | pending |
+| P2 — … | link | local | pending |
+| Pn — closeout | link | batch | pending |
+
+Linear order for `phase-execution`. If the general plan allows parallel work, still pick one order.
+
+**Size:** 3–6 subphases per file (max 8). One phase = one commit. Split the general plan if a phase would exceed that — do not write a 12-subphase file.
+
+**Tests:** `tests/unit/` default. HTTP route/schema change → ≤3 `tests/api/` tests in that wave; else gap row `API smoke | N/A`.
+
+---
+
+## Last file (default closeout)
+
+Subphases: gap table → optional code fixes → platform doc grep (`| Doc | Change |`) → operator README + `active_program` null (keep `rule_packs_catalog`). **Push: batch** (paste that tail, including WHILE).
+
+Do not skip gap or doc sync.
+
+---
+
+## Do not
+
+- One file for all phases
+- Ship gate only in README / “same as P2” / “see skill”
+- `**Stop:**` or “do not start P1”
+- Peer-review or implement in this session
+- Extra Revy/doc/gap files unless the general plan already has them
+
+**Done when:** every general-plan phase has a file; README Push column matches headers; each ship gate has a real Bugbot REPEAT; P0 is local, P1 is first-push, last is batch.
