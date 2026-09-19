@@ -10,6 +10,7 @@ from app.services.keycloak_webhooks import (
     apply_keycloak_webhook_event,
     delivery_id_from_payload,
     extract_email,
+    extract_email_verified,
     normalize_event_type,
     try_record_delivery,
 )
@@ -101,6 +102,24 @@ def test_extract_email_reads_updated_email():
     assert extract_email(payload) == "new@example.com"
 
 
+def test_extract_email_verified_omitted_is_unverified():
+    payload = {
+        "type": "REGISTER",
+        "userId": "kc-1",
+        "details": {"email": "user@example.com"},
+    }
+    assert extract_email_verified(payload) is False
+
+
+def test_extract_email_verified_reads_details_flag():
+    payload = {
+        "type": "REGISTER",
+        "userId": "kc-1",
+        "details": {"email": "user@example.com", "email_verified": "true"},
+    }
+    assert extract_email_verified(payload) is True
+
+
 @pytest.mark.asyncio
 async def test_apply_register_provisions_user():
     session = AsyncMock()
@@ -114,7 +133,35 @@ async def test_apply_register_provisions_user():
         new_callable=AsyncMock,
     ) as provision:
         await apply_keycloak_webhook_event(session, event_type="REGISTER", payload=payload)
-    provision.assert_awaited_once()
+    provision.assert_awaited_once_with(
+        session,
+        sub="kc-1",
+        email="user@example.com",
+        email_verified=True,
+        display_name=None,
+    )
+
+
+@pytest.mark.asyncio
+async def test_apply_register_without_email_verified_does_not_assume_verified():
+    session = AsyncMock()
+    payload = {
+        "type": "REGISTER",
+        "userId": "kc-1",
+        "details": {"email": "user@example.com"},
+    }
+    with patch(
+        "app.services.keycloak_webhooks.provision_user_from_keycloak",
+        new_callable=AsyncMock,
+    ) as provision:
+        await apply_keycloak_webhook_event(session, event_type="REGISTER", payload=payload)
+    provision.assert_awaited_once_with(
+        session,
+        sub="kc-1",
+        email="user@example.com",
+        email_verified=False,
+        display_name=None,
+    )
 
 
 @pytest.mark.asyncio

@@ -99,11 +99,12 @@ def extract_email(payload: dict[str, Any]) -> str | None:
     return str(email) if email else None
 
 
-def extract_email_verified(payload: dict[str, Any], *, event_type: str) -> bool:
+def extract_email_verified(payload: dict[str, Any]) -> bool:
+    """Read Keycloak ``details.email_verified``; omit → unverified (same as JWT JIT)."""
     details = payload.get("details")
     if isinstance(details, dict) and "email_verified" in details:
         return _parse_bool(details.get("email_verified"))
-    return event_type in PROVISION_EVENTS
+    return False
 
 
 def extract_enabled(payload: dict[str, Any]) -> bool | None:
@@ -196,7 +197,7 @@ async def _provision_from_webhook_event(
             session,
             sub=sub,
             email=extract_email(payload),
-            email_verified=extract_email_verified(payload, event_type=event_type),
+            email_verified=extract_email_verified(payload),
             display_name=extract_display_name(payload),
         )
     except (UnauthorizedError, ConflictError) as exc:
