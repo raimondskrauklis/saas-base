@@ -62,3 +62,24 @@ docker compose up -d --force-recreate
 | Health | `curl -sf http://127.0.0.1:9000/health/ready` |
 | Nginx | `deploy/nginx/auth.revy.createit.digital.conf` |
 | API env | `KEYCLOAK_URL=http://keycloak:8080` and `KEYCLOAK_ISSUER=https://auth.revy.createit.digital/realms/revy` in `/mnt/revy_volume/backend/.env` |
+
+## Identity webhook (vymalo 0.10.0-rc.1)
+
+Keycloak can send identity events to the API over an **internal** docker network (no public nginx route). Optional for local Mode A (JIT). Required only when this listener is deployed.
+
+1. Set `KEYCLOAK_WEBHOOK_SECRET` in backend `.env` (same value as `WEBHOOK_HTTP_AUTH_PASSWORD` in KC `.env`).
+2. Production: `TRUSTED_HOSTS` must include the compose service hostname Keycloak uses (`backend` if `WEBHOOK_HTTP_BASE_PATH=http://backend:8000/...`).
+3. Rebuild KC after Dockerfile changes: `docker compose build --no-cache && docker compose up -d`.
+4. Register a test user in KC.
+5. Verify delivery + user row:
+
+```bash
+# API logs
+docker logs app-api 2>&1 | grep keycloak_webhook
+
+# PostgreSQL (replace connection as needed)
+psql "$DATABASE_URL" -c "SELECT delivery_id, event_type, received_at FROM keycloak_webhook_deliveries ORDER BY received_at DESC LIMIT 5;"
+psql "$DATABASE_URL" -c "SELECT email, keycloak_user_id, status FROM users ORDER BY created_at DESC LIMIT 5;"
+```
+
+Full smoke: `docs/starter-pack/KEYCLOAK_DEV_CHECKLIST.md`. Each clone uses its own Keycloak database; local Mode A does not require this listener.

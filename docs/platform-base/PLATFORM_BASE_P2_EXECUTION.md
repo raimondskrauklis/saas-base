@@ -16,13 +16,15 @@ Do not ask Continue?. After each Deliverable, next heading. After the ship gate,
 - `webhooks/__init__.py` at this tag is Stripe-only — add Keycloak; do not import a GitHub webhook module.
 - Tests to adapt: `test_keycloak_provisioning.py`, `test_keycloak_webhook.py`, `test_keycloak_webhook_verify.py`, `test_keycloak_webhooks.py`, `test_bootstrap_config.py`, plus #32 edits to `test_auth_impersonation.py` and `AuthContext.test.tsx`.
 - Empty DBs only. Never Revy staging. Q15: `alembic -x test=true` on template `TEST_DATABASE_URL`.
+- Q17: do not stand up a template Keycloak. Start instructions are **P3**.
 
 ## Out of scope for P2
 
 - Keeping review-era revision ids → **out**
-- Generic brand / `.cursor/rules` → **P3**
+- Generic brand / `.cursor/rules` / start recipe → **P3**
 - Mode A smoke / tag → **P4**
 - Copying `docs/authorization/` from Revy into this template
+- Hosted saas-base Keycloak
 
 ## P2.1 — Alembic webhook tables
 

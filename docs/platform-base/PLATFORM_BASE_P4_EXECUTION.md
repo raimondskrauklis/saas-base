@@ -55,7 +55,7 @@ cd backend && pipenv run alembic history | rg -n '0004_github_installations|0018
 
 ## P4.3 — Mode A smoke on new DBs
 
-**What:** Follow `docs/starter-pack/DEV_BOOTSTRAP.md` against **new** template Postgres (`DATABASE_URL` / `TEST_DATABASE_URL` in `backend/.env`) + Keycloak. Not Revy staging. Register in KC → SPA callback → `GET /api/v1/me` returns `active` and a `users` row (webhook and/or JIT). Record pass/fail in findings P4 table. **If Postgres or Keycloak is down, fail this phase — do not skip smoke.**
+**What:** Follow `docs/platform-base/APP_REPLACE.md` start steps and `docs/starter-pack/DEV_BOOTSTRAP.md` against **this clone’s** Postgres (`DATABASE_URL` / `TEST_DATABASE_URL`) + **this clone’s** Keycloak. Not Revy, not a hosted template IdP. Register in KC → SPA callback → `GET /api/v1/me` returns `active` and a `users` row. JIT is enough (Q17); webhook optional. Record pass/fail in findings P4 table. **If Postgres or Keycloak is down, fail this phase — do not skip smoke.**
 **Files:** `docs/platform-base/PLATFORM_BASE_FINDINGS.md` (P4 verification rows)
 **Deliverable:** findings P4 table all green; `cd backend && pipenv run python -c "from app.core.config import settings; assert 'revy' not in (settings.database_url or '')"`
 

@@ -50,9 +50,9 @@ From [PLATFORM_BASE_FINDINGS.md](./PLATFORM_BASE_FINDINGS.md). **No file lists o
 
 **Goal:** A consumer can rename realm/hosts/app slug without leftover Revy product strings, and agents will not put GitHub installations back.
 
-**Scope:** In — AGENTS.md, README, env examples, i18n product name (`app_name`, account-delete copy, fixtures), docker/nginx/image names, extension ids leftover after P1; **`.cursor/rules`** (`00-core.mdc`, `app-color-tokens.mdc`) retargeted to generic SaaS (workspaces/settings/billing; brand in `tokens.css`; no `tokens.revy.css`, no GitHub installations). Out — designing Irbene brand; rewriting gitignored starter-pack; re-adding `tokens.app.css`.
+**Scope:** In — AGENTS.md, README, env examples, i18n product name (`app_name`, account-delete copy, fixtures), docker/nginx/image names, extension ids leftover after P1; **`.cursor/rules`** (`00-core.mdc`, `app-color-tokens.mdc`) retargeted to generic SaaS (workspaces/settings/billing; brand in `tokens.css`; no `tokens.revy.css`, no GitHub installations); **Q17 start recipe** (`APP_REPLACE.md` + rewrite `DEV_BOOTSTRAP.md` / `KEYCLOAK_DEV_CHECKLIST.md`). Out — designing Irbene brand; rewriting gitignored starter-pack; re-adding `tokens.app.css`; standing up a public template Keycloak.
 
-**Deliverables:** Documented `<app>` replace list; grep for `revy.createit.digital` / `revy[bot]` / `KEYCLOAK_REALM=revy` / `keycloak_realm="revy"` / `app_name.*Revy` / `revy-keycloak` / `/tmp/revy` is empty or placeholder-only.
+**Deliverables:** Documented `<app>` replace list **and** consumer start steps (own app DBs, own KC DB, realm/clients, env, Mode A); grep for `revy.createit.digital` / `revy[bot]` / `KEYCLOAK_REALM=revy` / `keycloak_realm="revy"` / `app_name.*Revy` / `revy-keycloak` / `/tmp/revy` is empty or placeholder-only.
 
 **Depends on:** P2.
 

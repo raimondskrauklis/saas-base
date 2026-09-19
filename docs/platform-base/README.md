@@ -18,13 +18,13 @@
 |:---|:---|:---|:---|
 | P0 — Repo and prefix | [PLATFORM_BASE_P0_EXECUTION.md](./PLATFORM_BASE_P0_EXECUTION.md) | local | done |
 | P1 — Strip Revy product | [PLATFORM_BASE_P1_EXECUTION.md](./PLATFORM_BASE_P1_EXECUTION.md) | first-push | done |
-| P2 — Port user provisioning | [PLATFORM_BASE_P2_EXECUTION.md](./PLATFORM_BASE_P2_EXECUTION.md) | local | pending |
+| P2 — Port user provisioning | [PLATFORM_BASE_P2_EXECUTION.md](./PLATFORM_BASE_P2_EXECUTION.md) | local | done |
 | P3 — Generic platform identity | [PLATFORM_BASE_P3_EXECUTION.md](./PLATFORM_BASE_P3_EXECUTION.md) | local | pending |
 | P4 — Prove and tag saas-base-v2 | [PLATFORM_BASE_P4_EXECUTION.md](./PLATFORM_BASE_P4_EXECUTION.md) | batch | pending |
 | P5 — Copy base into irbene_gate | [PLATFORM_BASE_P5_EXECUTION.md](./PLATFORM_BASE_P5_EXECUTION.md) | first-push | pending |
 | P6 — Irbene overlay | [PLATFORM_BASE_P6_EXECUTION.md](./PLATFORM_BASE_P6_EXECUTION.md) | batch | pending |
 
-**Next:** `phase-execution` from P2. Do not start P5 until `saas-base-v2` exists.
+**Next:** `phase-execution` from P3. Do not start P5 until `saas-base-v2` exists.
 
 **Source (local):** `/Users/raimonds.krauklis/projects/revy`  
 **Source (GitHub):** `https://github.com/raimondskrauklis/revy`  

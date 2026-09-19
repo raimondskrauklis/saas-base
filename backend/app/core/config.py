@@ -30,13 +30,15 @@ class Settings(BaseSettings):
 
     # One-time first deploy — remove from .env after super admin first login
     bootstrap_super_admin_email: str | None = None
+    keycloak_webhook_secret: str | None = None
 
     # Registration — USER_REGISTRATION.md (open SaaS default)
     registration_require_admin_approval: bool = False
     registration_require_profile_form: bool = False
 
-    # Security — comma-separated hosts for TrustedHostMiddleware (production)
-    trusted_hosts: str = "localhost,127.0.0.1"
+    # Security — comma-separated hosts for TrustedHostMiddleware (production).
+    # Include the compose service name Keycloak uses (Host: backend).
+    trusted_hosts: str = "localhost,127.0.0.1,backend"
 
     # Optional overrides (default to redis_url when unset)
     celery_broker_url: str | None = None
@@ -82,6 +84,10 @@ class Settings(BaseSettings):
     # Data export — ACCOUNT_LIFECYCLE.md
     export_storage_path: str = "/tmp/revy/exports"
     export_ttl_days: int = 7
+
+    @property
+    def keycloak_webhooks_enabled(self) -> bool:
+        return bool(self.keycloak_webhook_secret and self.keycloak_webhook_secret.strip())
 
     @property
     def keycloak_token_issuer(self) -> str:

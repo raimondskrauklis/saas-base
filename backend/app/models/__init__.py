@@ -7,6 +7,7 @@ from app.models.data_export_job import DataExportJobORM
 from app.models.impersonation_session import ImpersonationSessionORM
 from app.models.invitations import WorkspaceInvitationORM
 from app.models.items import ItemORM
+from app.models.keycloak_webhook_delivery import KeycloakWebhookDeliveryORM
 from app.models.users import UserORM
 from app.models.workspace_memberships import WorkspaceMembershipORM
 from app.models.workspaces import WorkspaceORM
@@ -18,6 +19,7 @@ __all__ = [
     "DataExportJobORM",
     "ImpersonationSessionORM",
     "ItemORM",
+    "KeycloakWebhookDeliveryORM",
     "TimestampedModel",
     "UserORM",
     "WorkspaceInvitationORM",

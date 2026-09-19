@@ -14,6 +14,7 @@ Do not ask Continue?. After each Deliverable, next heading. After the ship gate,
 - Placeholders only: no Irbene / VIRAC names in this template.
 - No `tokens.app.css`.
 - Document an `<app>` replace list in `docs/platform-base/` (one short file).
+- Q17: no hosted template IdP. Start instructions only. Placeholders `app` / `app-api` / `app-web`. Each clone: own app DBs + own Keycloak DB.
 - Grep must be empty or placeholder-only for the strings below.
 
 ## Out of scope for P3
@@ -21,6 +22,7 @@ Do not ask Continue?. After each Deliverable, next heading. After the ship gate,
 - Designing Irbene brand → **P6**
 - Rewriting gitignored `internal-docs` starter-pack
 - Tag / Mode A → **P4**
+- Standing up a public saas-base Keycloak / droplet IdP
 
 ## P3.1 — Cursor rules
 
@@ -40,10 +42,10 @@ Do not ask Continue?. After each Deliverable, next heading. After the ship gate,
 **Files:** `deploy/nginx/**`, `deploy/keycloak/**`, docker-compose files at repo root if present, any `revy-keycloak` image name
 **Deliverable:** `rg -n 'revy.createit.digital|revy\[bot\]|revy-keycloak|/mnt/revy' deploy && exit 1 || true`
 
-## P3.4 — Replace list and P3 grep
+## P3.4 — Replace list, start instructions, P3 grep
 
-**What:** Write `docs/platform-base/APP_REPLACE.md` listing realm, hosts, `app_name`, client ids, image names, export path. Then run the full P3 grep (empty or placeholder-only).
-**Files:** `docs/platform-base/APP_REPLACE.md` (new), `AGENTS.md`, `README.md` if they still claim Revy product
+**What:** Write `docs/platform-base/APP_REPLACE.md`: replace keys (realm, hosts, `app_name`, client ids, image names, export path) **and** numbered consumer start steps — (1) two app databases + one Keycloak database, new roles, never template `saas_base*` and never Revy; (2) extensions + `GRANT USAGE, CREATE` on `public`; (3) `alembic upgrade head`; (4) Keycloak compose against **that** KC DB (strip Revy JDBC from `.env.example` in P3.3); (5) realm `app` + clients `app-api` / `app-web`; (6) copy env examples; (7) Mode A JIT smoke. Rewrite `docs/starter-pack/DEV_BOOTSTRAP.md` and `KEYCLOAK_DEV_CHECKLIST.md` to those placeholders — no Revy hosts, no `vector`. Do not invent Irbene DNS. Then run the full P3 grep (empty or placeholder-only).
+**Files:** `docs/platform-base/APP_REPLACE.md` (new), `docs/starter-pack/DEV_BOOTSTRAP.md`, `docs/starter-pack/KEYCLOAK_DEV_CHECKLIST.md`, `AGENTS.md`, `README.md` if they still claim Revy product
 **Deliverable:**
 
 ```bash
