@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -20,7 +20,6 @@ from app.core.sqlalchemy_errors import is_unique_violation
 from app.models.users import UserORM
 from app.models.workspace_memberships import WorkspaceMembershipORM
 from app.models.workspaces import WorkspaceORM
-from app.services.memberships import _count_workspace_admins
 from app.services.onboarding import (
     maybe_auto_provision_user,
     resolve_initial_user_status,
@@ -238,7 +237,17 @@ async def _release_workspace_on_identity_deleted(
         await session.delete(membership)
         return
     if membership.role == AppRole.admin:
-        admin_count = await _count_workspace_admins(session, workspace_id=workspace_id)
+        admin_count = int(
+            await session.scalar(
+                select(func.count())
+                .select_from(WorkspaceMembershipORM)
+                .where(
+                    WorkspaceMembershipORM.workspace_id == workspace_id,
+                    WorkspaceMembershipORM.role == AppRole.admin,
+                )
+            )
+            or 0
+        )
         if admin_count <= 1:
             others[0].role = AppRole.admin
     await session.delete(membership)
