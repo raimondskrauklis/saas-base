@@ -12,6 +12,7 @@ from app.services.keycloak_webhooks import (
     extract_email,
     extract_email_verified,
     normalize_event_type,
+    parse_json_payload,
     try_record_delivery,
 )
 
@@ -118,6 +119,15 @@ def test_extract_email_verified_reads_details_flag():
         "details": {"email": "user@example.com", "email_verified": "true"},
     }
     assert extract_email_verified(payload) is True
+
+
+def test_parse_json_payload_rejects_non_object():
+    with pytest.raises(ValueError, match="JSON object"):
+        parse_json_payload(b"[1]")
+
+
+def test_parse_json_payload_reads_object():
+    assert parse_json_payload(b'{"type":"REGISTER"}')["type"] == "REGISTER"
 
 
 @pytest.mark.asyncio

@@ -21,6 +21,7 @@ from app.services.keycloak_webhooks import (
     apply_keycloak_webhook_event,
     delivery_id_from_payload,
     normalize_event_type,
+    parse_json_payload,
 )
 
 router = APIRouter()
@@ -53,11 +54,11 @@ async def post_keycloak_webhook(
 
     body = await request.body()
     try:
-        payload = json.loads(body.decode())
+        payload = parse_json_payload(body)
     except json.JSONDecodeError as exc:
         raise ValidationError(message="Invalid JSON payload") from exc
-    if not isinstance(payload, dict):
-        raise ValidationError(message="Webhook payload must be a JSON object")
+    except ValueError as exc:
+        raise ValidationError(message="Webhook payload must be a JSON object") from exc
 
     event_type = normalize_event_type(payload, keycloak_event)
     delivery_id = delivery_id_from_payload(event_type, payload)

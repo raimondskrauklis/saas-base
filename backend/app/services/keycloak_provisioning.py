@@ -16,6 +16,7 @@ from app.constants.enums import PlatformRole, UserStatus
 from app.core.config import settings
 from app.core.exceptions import ConflictError, UnauthorizedError
 from app.core.logging import get_logger
+from app.core.sqlalchemy_errors import is_unique_violation
 from app.models.users import UserORM
 from app.models.workspace_memberships import WorkspaceMembershipORM
 from app.services.onboarding import (
@@ -29,13 +30,6 @@ from app.services.users import (
 )
 
 logger = get_logger(__name__)
-
-_UNIQUE_VIOLATION_PG_CODE = "23505"
-
-
-def _is_unique_violation(exc: IntegrityError) -> bool:
-    orig = exc.orig
-    return orig is not None and getattr(orig, "pgcode", None) == _UNIQUE_VIOLATION_PG_CODE
 
 
 def normalize_email(email: str) -> str:
@@ -147,7 +141,7 @@ async def provision_user_from_keycloak(
         async with session.begin_nested():
             await session.flush()
     except IntegrityError as exc:
-        if not _is_unique_violation(exc):
+        if not is_unique_violation(exc):
             raise
         session.expunge(user)
         existing = await get_user_by_keycloak_id(session, sub)

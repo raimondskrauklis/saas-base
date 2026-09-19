@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import ConflictError, ServiceUnavailableError, UnauthorizedError
 from app.core.logging import get_logger
+from app.core.sqlalchemy_errors import is_unique_violation
 from app.models.keycloak_webhook_delivery import KeycloakWebhookDeliveryORM
 from app.services.keycloak_provisioning import (
     apply_keycloak_user_deleted,
@@ -19,8 +20,6 @@ from app.services.keycloak_provisioning import (
 )
 
 logger = get_logger(__name__)
-
-_UNIQUE_VIOLATION_PG_CODE = "23505"
 
 PROVISION_EVENTS = frozenset({
     "REGISTER",
@@ -43,11 +42,6 @@ IGNORED_EVENTS = frozenset({
     "CODE_TO_TOKEN",
     "REFRESH_TOKEN",
 })
-
-
-def _is_unique_violation(exc: IntegrityError) -> bool:
-    orig = exc.orig
-    return orig is not None and getattr(orig, "pgcode", None) == _UNIQUE_VIOLATION_PG_CODE
 
 
 def _parse_bool(value: object, *, default: bool = False) -> bool:
@@ -147,7 +141,7 @@ async def try_record_delivery(
         async with session.begin_nested():
             await session.flush()
     except IntegrityError as exc:
-        if not _is_unique_violation(exc):
+        if not is_unique_violation(exc):
             raise
         session.expunge(delivery)
         logger.info(
