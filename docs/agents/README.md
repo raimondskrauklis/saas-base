@@ -44,7 +44,7 @@ next phase immediately (no “Continue?”)
 | [prompts/ROLES.md](./prompts/ROLES.md) | Human / master / reviewer |
 | [prompts/OUTPUT_FORMAT.md](./prompts/OUTPUT_FORMAT.md) | VERB pass blocks |
 
-**Skills:** `phase-execution` · `ship-changes` · `babysit-revy-pr` (only if installed)
+**Skills:** `phase-execution` · `ship-changes` · `babysit-revy-pr`
 
 ---
 

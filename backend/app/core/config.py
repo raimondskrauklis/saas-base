@@ -39,8 +39,8 @@ _LEGACY_DATABASE_URL_MSG = (
 
 
 def canonicalize_environment(value: str) -> str:
-    env = value.strip().lower()
-    if env not in _ENV_DATABASE_FIELDS:
+    env = _ALEMBIC_STAGE_ALIASES.get(value.strip().lower())
+    if env is None:
         allowed = ", ".join(sorted(_ENV_DATABASE_FIELDS))
         raise ValueError(f"ENVIRONMENT must be one of: {allowed} (got {value!r})")
     return env
@@ -205,6 +205,7 @@ class Settings(BaseSettings):
         if os.environ.get("DATABASE_URL", "").strip():
             raise ValueError(_LEGACY_DATABASE_URL_MSG)
         env = canonicalize_environment(self.environment)
+        self.environment = env
         field, env_name = _ENV_DATABASE_FIELDS[env]
         url = getattr(self, field)
         if not url or not str(url).strip():

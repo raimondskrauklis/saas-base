@@ -15,7 +15,8 @@ import i18n from '@/i18n/config';
 import { initKeycloak, resetKeycloak, setKeycloakInitialized } from '@/lib/keycloak';
 import { log } from '@/lib/log';
 import { Sentry } from '@/lib/sentry';
-import { mapApiError, showDomainErrorToast } from '@/shared/errors';
+import { mapApiError } from '@/shared/errors';
+import { showDomainErrorToast } from '@/shared/errors/toasts';
 
 const PROVISION_ERROR_CODES = new Set(['provision_email_required', 'identity_email_conflict']);
 

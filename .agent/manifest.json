@@ -7,7 +7,7 @@
   "frontend_dir": "frontend",
   "default_scope": ["backend/**"],
   "scopes": {
-    "layout": "FastAPI backend/ + React frontend/ + Keycloak in deploy/. After P0 import from saas-base-v1.1.",
+    "layout": "FastAPI backend/ + React frontend/ + Keycloak in deploy/.",
     "default": ["backend/**"],
     "available": ["backend/**", "frontend/**", "deploy/**"],
     "note": "Default one primary glob (backend). Full-stack programs add frontend/** in review-context programs[].scope."
@@ -21,8 +21,8 @@
   "hosting": {
     "kind": "github",
     "pr_tool": "gh",
-    "review_bot": null,
-    "note": "Private raimondskrauklis/saas-base. GitHub without Revy. Origin may be added in P0; do not assume it exists before then. No Revy poll loops."
+    "review_bot": "revy",
+    "note": "Private raimondskrauklis/saas-base. This template is not the Revy product. PRs run the Revy GitHub check (revybot). Clones set their own domain, Keycloak, and databases."
   },
   "test_commands": {
     "backend_lint": "cd backend && pipenv run ruff check --fix . && pipenv run ruff check .",
@@ -31,8 +31,8 @@
     "frontend_test": "cd frontend && npm test"
   },
   "review_context": {
-    "ssot": ".agent/review-context.json",
-    "product_mirror": null,
+    "ssot": ".revy/review-context.json",
+    "product_mirror": ".agent/review-context.json",
     "bugbot": ".cursor/BUGBOT.md",
     "rule_packs": null
   },
@@ -49,9 +49,9 @@
       "skill": "ship-changes"
     },
     "revy-babysit": {
-      "enabled": false,
+      "enabled": true,
       "skill": "babysit-revy-pr",
-      "note": "This template is not Revy and PRs will not run Revy."
+      "note": "On demand when the user asks to poll/fix Revy PR findings — not part of default ship"
     }
   },
   "skills": {
@@ -67,7 +67,9 @@
       "architecture-peer-review",
       "execution-peer-review",
       "devils-advocate",
-      "post-finish-gap-pass"
+      "post-finish-gap-pass",
+      "babysit-revy-pr",
+      "sentry-fix-issues"
     ]
   },
   "validation": {

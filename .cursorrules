@@ -14,7 +14,7 @@ Detailed rules: **`.cursor/rules/`** (modular `.mdc` files):
 - `testing.mdc` — pytest + Vitest (`**/tests/**`, `**/*.test.*`)
 - `sentry-mcp.mdc` — Sentry MCP manual debugging only
 
-**Skills:** `.cursor/skills/ship-changes`, `sentry-fix-issues`, `phase-execution`, `chunk-execution` — see AGENTS.md.
+**Skills:** `.cursor/skills/ship-changes`, `babysit-revy-pr`, `sentry-fix-issues`, `phase-execution`, `chunk-execution` — see AGENTS.md.
 
 **Scaffold runbooks (committed):** `docs/starter-pack/` — bootstrap, Keycloak, registration flags.
 

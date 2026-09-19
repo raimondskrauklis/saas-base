@@ -15,7 +15,7 @@ Do not ask Continue?. After each Deliverable, next heading. After the ship gate,
 - Do not leak Irbene names back into the tagged `saas-base` template.
 - `docs/vision.md` in the consumer stays the north star (do not rewrite as a SaaS runbook).
 - Findings consumer P6 gate: `backend/` + `frontend/` present; vision unchanged; new DBs; no ontology tables.
-- Clear `active_program` → `null` in **template** `.agent/review-context.json` only after the gap table has no fix-now rows. Keep `rule_packs_catalog`.
+- Clear `active_program` → `null` in **template** `.revy/review-context.json` (SSOT) **and** the `.agent/review-context.json` mirror only after the gap table has no fix-now rows. Keep `rule_packs_catalog`. Both files must stay identical.
 
 ## Out of scope for P6
 
@@ -44,9 +44,9 @@ Do not ask Continue?. After each Deliverable, next heading. After the ship gate,
 
 ## P6.4 — Doc sync and idle review-context
 
-**What:** Platform doc grep for this program (`| Doc | Change |`): findings P6 gate green; general plan SHA already recorded; consumer pointer has `saas-base-v2`; template `docs/platform-base/README.md` status rows P0–P6 done. Then set template `.agent/review-context.json` `active_program` to `null`; keep `rule_packs_catalog`. Update `.cursor/BUGBOT.md` idle stub.
-**Files:** `/Users/raimonds.krauklis/projects/saas-base/docs/platform-base/README.md`, `/Users/raimonds.krauklis/projects/saas-base/docs/platform-base/PLATFORM_BASE_FINDINGS.md`, `/Users/raimonds.krauklis/projects/saas-base/.agent/review-context.json`, `/Users/raimonds.krauklis/projects/saas-base/.cursor/BUGBOT.md`; consumer `docs/platform-base/README.md` if needed
-**Deliverable:** `python3 -c "import json; p=json.load(open('/Users/raimonds.krauklis/projects/saas-base/.agent/review-context.json')); assert p['active_program'] is None"`
+**What:** Platform doc grep for this program (`| Doc | Change |`): findings P6 gate green; general plan SHA already recorded; consumer pointer has `saas-base-v2`; template `docs/platform-base/README.md` status rows P0–P6 done. Then set template `.revy/review-context.json` and `.agent/review-context.json` `active_program` to `null` (same JSON); keep `rule_packs_catalog`. Update `.cursor/BUGBOT.md` idle stub.
+**Files:** `/Users/raimonds.krauklis/projects/saas-base/docs/platform-base/README.md`, `/Users/raimonds.krauklis/projects/saas-base/docs/platform-base/PLATFORM_BASE_FINDINGS.md`, `/Users/raimonds.krauklis/projects/saas-base/.revy/review-context.json`, `/Users/raimonds.krauklis/projects/saas-base/.agent/review-context.json`, `/Users/raimonds.krauklis/projects/saas-base/.cursor/BUGBOT.md`; consumer `docs/platform-base/README.md` if needed
+**Deliverable:** `python3 -c "import json; a=json.load(open('/Users/raimonds.krauklis/projects/saas-base/.revy/review-context.json')); b=json.load(open('/Users/raimonds.krauklis/projects/saas-base/.agent/review-context.json')); assert a==b and a['active_program'] is None"`
 
 **Phase gate:**
 
@@ -57,8 +57,8 @@ test -d backend && test -d frontend
 rg -n 'saas-base-v2' docs/platform-base/README.md
 rg -q 'VIRAC_' backend/.env.example
 rg -n 'revy.createit.digital' backend frontend deploy && exit 1 || true
-# template SSOT
-python3 -c "import json; p=json.load(open('/Users/raimonds.krauklis/projects/saas-base/.agent/review-context.json')); assert p['active_program'] is None"
+# template SSOT + mirror
+python3 -c "import json; a=json.load(open('/Users/raimonds.krauklis/projects/saas-base/.revy/review-context.json')); b=json.load(open('/Users/raimonds.krauklis/projects/saas-base/.agent/review-context.json')); assert a==b and a['active_program'] is None"
 ```
 
 (Run overlay pytest/npm in the consumer if env allows; Mode A evidence in findings P6 rows.)

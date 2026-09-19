@@ -94,14 +94,26 @@ def test_unknown_environment_fails():
         )
 
 
-def test_environment_alias_dev_is_rejected():
-    with pytest.raises(ValidationError, match="ENVIRONMENT must be one of"):
-        Settings(
-            **_BASE,
-            _env_file=None,
-            environment="dev",
-            dev_database_url="postgresql+asyncpg://localhost/saas_base_dev",
-        )
+def test_environment_alias_dev_canonicalizes():
+    settings = Settings(
+        **_BASE,
+        _env_file=None,
+        environment="dev",
+        dev_database_url="postgresql+asyncpg://localhost/saas_base_dev",
+    )
+    assert settings.environment == "development"
+    assert settings.database_url.endswith("/saas_base_dev")
+
+
+def test_environment_alias_prod_canonicalizes():
+    settings = Settings(
+        **_BASE,
+        _env_file=None,
+        environment="prod",
+        production_database_url="postgresql+asyncpg://localhost/saas_base_prod",
+    )
+    assert settings.environment == "production"
+    assert settings.database_url.endswith("/saas_base_prod")
 
 
 def test_unknown_env_key_is_rejected():

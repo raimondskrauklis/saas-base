@@ -11,7 +11,7 @@ from starlette.responses import Response
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.core.exceptions import ServiceUnavailableError, ValidationError
+from app.core.exceptions import ServiceUnavailableError, UnauthorizedError, ValidationError
 from app.integrations.keycloak_webhook import (
     verify_keycloak_webhook_basic_auth,
     verify_keycloak_webhook_secret,
@@ -46,9 +46,9 @@ async def post_keycloak_webhook(
             secret,
         )
     if not authorized:
-        raise ValidationError(
+        raise UnauthorizedError(
             message="Invalid Keycloak webhook secret",
-            field="X-Webhook-Secret",
+            error_code="keycloak_webhook_unauthorized",
         )
 
     body = await request.body()

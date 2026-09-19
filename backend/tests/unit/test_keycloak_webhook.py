@@ -7,7 +7,7 @@ import pytest
 from starlette.requests import Request
 
 from app.api.v1.webhooks.keycloak import post_keycloak_webhook
-from app.core.exceptions import ServiceUnavailableError, UnauthorizedError, ValidationError
+from app.core.exceptions import ServiceUnavailableError, UnauthorizedError
 
 
 def _request_with_body(body: bytes) -> Request:
@@ -49,12 +49,13 @@ async def test_post_keycloak_webhook_requires_secret():
     with patch("app.api.v1.webhooks.keycloak.settings") as mock_settings:
         mock_settings.keycloak_webhooks_enabled = True
         mock_settings.keycloak_webhook_secret = "secret"
-        with pytest.raises(ValidationError):
+        with pytest.raises(UnauthorizedError) as exc:
             await post_keycloak_webhook(
                 request=request,
                 session=session,
                 webhook_secret=None,
             )
+    assert exc.value.error_code == "keycloak_webhook_unauthorized"
 
 
 @pytest.mark.asyncio

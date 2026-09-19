@@ -20,6 +20,6 @@ Reviewer → Bugbot subagent; one task per spawn
 implement → tests → lint → LOCAL BUGBOT → commit → push only if hosting + ship gate
 ```
 
-**Do not push** with open Bugbot blockers. Skills: `phase-execution` · `ship-changes` · `babysit-revy-pr` (if installed).
+**Do not push** with open Bugbot blockers. Skills: `phase-execution` · `ship-changes` · `babysit-revy-pr`. Never push while Revy is `pending`.
 
 Pack SSOT: sibling `../agent-workflow` (`pack_source` in the manifest).

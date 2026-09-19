@@ -1,8 +1,8 @@
 # Agent guide — saas-base
 
-Generic SaaS platform template (FastAPI + React + Keycloak). **Not** Revy.
+Generic SaaS platform template (FastAPI + React + Keycloak). **Not** the Revy product — clones own domain, Keycloak, and databases. PRs on this repo run the Revy GitHub check.
 
-Coding rules: [.cursorrules](.cursorrules) and `.cursor/rules/` from the frozen shell (keep; do not replace with kp-platform).
+Coding rules: [.cursorrules](.cursorrules) and `.cursor/rules/` (keep; do not replace with kp-platform).
 
 ## Agent workflow
 
@@ -10,7 +10,7 @@ Coding rules: [.cursorrules](.cursorrules) and `.cursor/rules/` from the frozen 
 |-------|------|
 | **Flow manifest** | [.agent/manifest.json](.agent/manifest.json) — `hosting`, `pack_source`, `default_scope` |
 | **Skill catalog** | [.agent/skills.catalog.json](.agent/skills.catalog.json) |
-| **Review context SSOT** | [.agent/review-context.json](.agent/review-context.json) |
+| **Review context SSOT** | [.revy/review-context.json](.revy/review-context.json) — mirrored to [.agent/review-context.json](.agent/review-context.json) |
 | **Orchestration** | [docs/agents/README.md](docs/agents/README.md) |
 | **Quick ref** | [docs/utils/CURSOR_AGENT_WORKFLOW.md](docs/utils/CURSOR_AGENT_WORKFLOW.md) |
 | **Bugbot (pre-push)** | [.cursor/BUGBOT.md](.cursor/BUGBOT.md) |
@@ -18,19 +18,23 @@ Coding rules: [.cursorrules](.cursorrules) and `.cursor/rules/` from the frozen 
 
 Active LOOP program: see review-context SSOT → `active_program` (`null` when idle).
 
-**LOOP contract:** The agent **executes until the program is done**. Do **not** ask “Continue?”. Local commit every phase. Honour `hosting.kind` — GitHub PRs via `gh` after a remote exists; **no Revy**. **Only pause:** migration subphase.
+**LOOP contract:** The agent **executes until the program is done**. Do **not** ask “Continue?”. Local commit every phase. Honour `hosting.kind` — GitHub PRs via `gh`. Before a later push: fetch Revy first, fix, then push with the latest work. Never push while Revy is `pending`. **Only pause:** migration subphase.
 
-Read **only** the current `*_Pn_EXECUTION.md`.
+Read **only** the current `*_Pn_EXECUTION.md`. Each subphase Deliverable must be green before the next heading — then continue immediately.
 
 ### Skills (installed)
+
+Full catalog: `.agent/skills.catalog.json`. Installed set in `.agent/manifest.json` → `skills.installed`.
 
 | Tier | Skills |
 |------|--------|
 | **Meta** | `bootstrap-workflow` |
 | **Core** | `phase-execution`, `ship-changes`, `chunk-execution` |
 | **Planning** | `create-findings`, `create-general-plan`, `create-execution-plan`, `architecture-peer-review`, `execution-peer-review`, `devils-advocate`, `post-finish-gap-pass` |
+| **Revy** | `babysit-revy-pr` — on demand when the user asks to poll/fix Revy findings |
+| **Sentry** | `sentry-fix-issues` — one issue the user points at; never unprompted |
 
-Not installed: `babysit-revy-pr` (GitHub without Revy), Sentry, docs export, staging-validation.
+Not installed: docs export (`md-formatting`, mermaid, docx), `staging-validation`, kp-platform corpus/line-count skills.
 
 **Default gate:** local Bugbot before every ship.
 

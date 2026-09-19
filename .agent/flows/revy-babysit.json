@@ -1,0 +1,5 @@
+{
+  "enabled": true,
+  "skill": "babysit-revy-pr",
+  "description": "On demand when GitHub PRs run Revy and the user asks to poll/fix"
+}
