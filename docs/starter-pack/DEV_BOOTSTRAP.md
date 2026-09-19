@@ -11,7 +11,7 @@ This template does not ship a running public Keycloak. Bring up your own IdP aga
 
 ## Prerequisites
 
-- PostgreSQL cluster with **two app databases** (dev + test) and **one Keycloak database** — new roles; never another product’s DBs
+- PostgreSQL cluster with **four app databases** (dev, test, staging, prod) and **one Keycloak database** — app role plus a **read-only** role for analysis
 - Docker (local Redis; Keycloak compose in `deploy/keycloak/config/`)
 - `pipenv`, Node 24 LTS+
 
@@ -24,7 +24,7 @@ cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env.local
 ```
 
-Set `DATABASE_URL`, `TEST_DATABASE_URL`, `KEYCLOAK_*`, `SECRET_KEY`. `Settings` rejects unknown keys — keep only variables from `.env.example`.
+Set `ENVIRONMENT=development`, `DEV_DATABASE_URL`, `TEST_DATABASE_URL`, matching `*_DATABASE_URL_READONLY` (separate keys — do not overwrite admin URLs), `KEYCLOAK_*`, `SECRET_KEY`. `Settings` **forbids** unknown keys. Analysis: [DATABASE_CONNECTION_GUIDE.md](../utils/DATABASE_CONNECTION_GUIDE.md).
 
 Mode A (must match frontend — [REGISTRATION_FLAGS.md](./REGISTRATION_FLAGS.md)):
 
@@ -33,12 +33,12 @@ REGISTRATION_REQUIRE_ADMIN_APPROVAL=false
 REGISTRATION_REQUIRE_PROFILE_FORM=false
 ```
 
-`ENVIRONMENT=development` for local API. Use `ENVIRONMENT=test` when pointing unit tests at `TEST_DATABASE_URL`.
+`ENVIRONMENT` selects the process bind (`development` → `DEV_DATABASE_URL`). Local Alembic uses that URL; `alembic -x test=true` uses `TEST_DATABASE_URL`. Production is migrated by GitHub Actions on the droplet (`alembic upgrade head` with `ENVIRONMENT=production` in the droplet env file). Do not migrate production from a laptop.
 
 Verify:
 
 ```bash
-cd backend && pipenv run python -c "from app.core.config import settings; print(settings.environment)"
+cd backend && pipenv run python -c "from app.core.config import settings; print(settings.environment, settings.database_url.rsplit('/', 1)[-1])"
 ```
 
 ---
@@ -67,6 +67,8 @@ pipenv run alembic upgrade head
 pipenv run alembic current
 pipenv run alembic -x test=true upgrade head
 ```
+
+Production schema is applied by `.github/workflows/deploy.yml` on the droplet. A staging droplet is not part of the initial topology.
 
 Online migrations use `AUTOCOMMIT` in `backend/alembic/env.py`.
 

@@ -7,8 +7,9 @@ from app.core.config import Settings
 
 def test_keycloak_token_issuer_defaults_to_keycloak_url():
     settings = Settings(
+        _env_file=None,
         environment="development",
-        database_url="postgresql+asyncpg://localhost/app",
+        dev_database_url="postgresql+asyncpg://localhost/app",
         redis_url="redis://localhost:6379/0",
         secret_key="test",
         allowed_origins="http://localhost:5173",
@@ -23,8 +24,9 @@ def test_keycloak_token_issuer_defaults_to_keycloak_url():
 
 def test_keycloak_token_issuer_uses_public_override():
     settings = Settings(
+        _env_file=None,
         environment="production",
-        database_url="postgresql+asyncpg://localhost/app",
+        production_database_url="postgresql+asyncpg://localhost/app",
         redis_url="redis://localhost:6379/0",
         secret_key="test",
         allowed_origins="https://app.example.com",

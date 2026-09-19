@@ -1,6 +1,6 @@
 # backend/docker-compose.yml
 # Local infrastructure only — Redis for Celery broker/cache.
-# PostgreSQL: DigitalOcean managed (set DATABASE_URL in backend/.env).
+# PostgreSQL: DigitalOcean managed (ENVIRONMENT selects DEV_/TEST_/STAGING_/PRODUCTION_DATABASE_URL).
 
 services:
   redis:

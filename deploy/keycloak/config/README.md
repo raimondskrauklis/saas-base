@@ -78,8 +78,8 @@ Keycloak can send identity events to the API over an **internal** docker network
 docker logs app-api 2>&1 | grep keycloak_webhook
 
 # PostgreSQL (replace connection as needed)
-psql "$DATABASE_URL" -c "SELECT delivery_id, event_type, received_at FROM keycloak_webhook_deliveries ORDER BY received_at DESC LIMIT 5;"
-psql "$DATABASE_URL" -c "SELECT email, keycloak_user_id, status FROM users ORDER BY created_at DESC LIMIT 5;"
+psql "$DEV_DATABASE_URL" -c "SELECT delivery_id, event_type, received_at FROM keycloak_webhook_deliveries ORDER BY received_at DESC LIMIT 5;"
+psql "$DEV_DATABASE_URL" -c "SELECT email, keycloak_user_id, status FROM users ORDER BY created_at DESC LIMIT 5;"
 ```
 
 Full smoke: `docs/starter-pack/KEYCLOAK_DEV_CHECKLIST.md`. Each clone uses its own Keycloak database; local Mode A does not require this listener.

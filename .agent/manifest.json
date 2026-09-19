@@ -26,7 +26,7 @@
   },
   "test_commands": {
     "backend_lint": "cd backend && pipenv run ruff check --fix . && pipenv run ruff check .",
-    "backend_test": "cd backend && pipenv run pytest tests/unit/ -q",
+    "backend_test": "cd backend && pipenv run pytest tests/unit/ tests/api/ -q",
     "frontend_lint": "cd frontend && npm run lint",
     "frontend_test": "cd frontend && npm test"
   },

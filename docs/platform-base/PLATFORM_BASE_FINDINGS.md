@@ -174,7 +174,7 @@ Do **not** use an unscoped repo-wide content grep (historical `docs/saas-base/` 
 | Q12 | P5 copy shape | **locked** | Same as Q8: whole tree minus Out-list; merge `.gitignore`. |
 | Q13 | Theme after deleting `tokens.revy.css` | **locked** | Fold leftover `--rv-*` into `tokens.css`. P1 drops file + `@import`. P3 retargets `.cursor/rules` (no GitHub installations; brand is `tokens.css`). Do **not** edit those rules in P1. |
 | Q14 | Product grep `.cursor/` ownership? | **locked** | **Omit `.cursor/` until P4.** P1 = `backend/` `frontend/` `deploy/` + corpus delete. P4 (after P3) adds `.cursor/`. Do not split rule edits across P1 and P3. |
-| Q15 | Template test / migrate DB? | **locked** | Dedicated **new** Postgres for this template: `DATABASE_URL` (dev) + `TEST_DATABASE_URL` (pytest fixtures + `alembic -x test=true`). Never Revy staging/prod. After each migration Pause LOOP, apply the chain on the template test DB when `TEST_DATABASE_URL` is set. Default unit tests stay mocked (Q16). |
+| Q15 | Template test / migrate DB? | **locked** | Four app DBs: `saas_base_dev` / `saas_base_test` / `saas_base_staging` / `saas_base_prod`. `ENVIRONMENT` selects the admin URL. Local Alembic: dev + `alembic -x test=true`. Production is upgraded on the droplet by GitHub Actions (`alembic upgrade head`, `ENVIRONMENT=production`). Initial topology is **one droplet = production**; a staging droplet comes later. Cursor / analysis uses `*_DATABASE_URL_READONLY`. Default unit tests stay mocked (Q16). |
 | Q16 | Testing baseline before `saas-base-v2`? | **locked** | Finish the half-built kp/tender_pro pattern **in this template before the tag**, not inside P1–P3. L1 seed: user + workspace + membership, fixed UUIDs, `TEST_DATABASE_URL` only, DB name must contain `test`, idempotent upsert (not skip-if-any-row). `tests/api/` HTTP contract smokes (status / envelope / 401 / 403; cap 2–3 per route). Mocked `tests/unit/` stays default; a unit test **may** take `db_session` for SQL/constraints. Do **not** copy kp’s domain `seed_test_data.py`. Flip the “no `tests/api/`” rule. Empty `tests/service/` — do not add. **Playwright is out of P0–P6** (parking lot). |
 | Q17 | Template Keycloak / how a new project starts? | **locked** | **No hosted saas-base product IdP.** Each clone owns app Postgres (dev+test) **and** its own Keycloak (own Keycloak database — never the app DB, never Revy). Template ships generic placeholders (`app` / `app-api` / `app-web`) plus start instructions — not a running public realm. `APP_REPLACE.md` + rewritten `DEV_BOOTSTRAP.md` / `KEYCLOAK_DEV_CHECKLIST.md` (P3). Strip Revy JDBC/hosts from `deploy/keycloak/config/.env.example`. Local Mode A = JIT; vymalo webhook is optional for a deployed Keycloak. |
 
@@ -204,12 +204,12 @@ Do **not** use an unscoped repo-wide content grep (historical `docs/saas-base/` 
 
 Pass/fail for **clean base / template repo** (P4 gate):
 
-- `cd backend && pipenv run pytest tests/unit/ tests/api/ -q` green (`TEST_DATABASE_URL` set).
-- `cd frontend && npm test` green.
-- No Playwright config in this tag (`test ! -f frontend/playwright.config.ts`).
-- Product grep P1-tree empty (`backend/` `frontend/` `deploy/`); `.cursor/` empty (after P3); `docs/review-pipeline/` absent.
-- `alembic heads` = `2026_07_26_1910_0011_keycloak_webhook_deliveries_received_at_idx` only; `alembic history` has no `0004` github_installations file and no `0018`.
-- Mode A: register in KC → SPA callback → `GET /api/v1/me` returns `active` **and** a `users` row (webhook and/or JIT).
+- `cd backend && pipenv run pytest tests/unit/ tests/api/ -q` green (`TEST_DATABASE_URL` set). **pass** (266).
+- `cd frontend && npm test` green. **pass** (99).
+- No Playwright config in this tag (`test ! -f frontend/playwright.config.ts`). **pass**.
+- Product grep P1-tree empty (`backend/` `frontend/` `deploy/`); `.cursor/` empty (after P3); `docs/review-pipeline/` absent. **pass**.
+- `alembic heads` = `2026_09_19_2000_0012_workspace_memberships_updated_at` (adds `workspace_memberships.updated_at` so TimestampedModel matches 0001); parent is `0011`. History has no `0004` github_installations file and no `0018`. **pass**.
+- Mode A: register in this clone’s Keycloak (`start-dev` Path A, realm `app`, clients `app-web`/`app-api`) → SPA callback → `GET /api/v1/me` **200** and `users.status = active` on `saas_base_dev`. **pass** (JIT; webhook not required). First token had `email_verified=false` until the KC user was marked verified — same fail cause as DEV_BOOTSTRAP.
 
 Pass/fail for **consumer repo** (`irbene_gate`, P6 gate):
 

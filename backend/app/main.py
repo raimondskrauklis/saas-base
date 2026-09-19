@@ -60,7 +60,7 @@ def create_app() -> FastAPI:
         allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "X-Workspace-Id"],
     )
 
-    if settings.environment == "production":
+    if settings.environment in ("production", "staging"):
         hosts = [h.strip() for h in settings.trusted_hosts.split(",") if h.strip()]
         app.add_middleware(TrustedHostMiddleware, allowed_hosts=hosts)
 

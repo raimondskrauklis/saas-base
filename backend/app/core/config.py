@@ -1,8 +1,85 @@
 # backend/app/core/config.py
 """Application settings — fail-fast on missing required env (no URL defaults in code)."""
-import json
+from __future__ import annotations
 
+import json
+import os
+from typing import Self
+
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_ENV_DATABASE_FIELDS: dict[str, tuple[str, str]] = {
+    "development": ("dev_database_url", "DEV_DATABASE_URL"),
+    "test": ("test_database_url", "TEST_DATABASE_URL"),
+    "staging": ("staging_database_url", "STAGING_DATABASE_URL"),
+    "production": ("production_database_url", "PRODUCTION_DATABASE_URL"),
+}
+
+_ENV_DATABASE_READONLY_FIELDS: dict[str, tuple[str, str]] = {
+    "development": ("dev_database_url_readonly", "DEV_DATABASE_URL_READONLY"),
+    "test": ("test_database_url_readonly", "TEST_DATABASE_URL_READONLY"),
+    "staging": ("staging_database_url_readonly", "STAGING_DATABASE_URL_READONLY"),
+    "production": ("production_database_url_readonly", "PRODUCTION_DATABASE_URL_READONLY"),
+}
+
+_ALEMBIC_STAGE_ALIASES: dict[str, str] = {
+    "dev": "development",
+    "development": "development",
+    "test": "test",
+    "staging": "staging",
+    "prod": "production",
+    "production": "production",
+}
+
+_LEGACY_DATABASE_URL_MSG = (
+    "DATABASE_URL is not used. Set DEV_DATABASE_URL, TEST_DATABASE_URL, "
+    "STAGING_DATABASE_URL, or PRODUCTION_DATABASE_URL for ENVIRONMENT."
+)
+
+
+def canonicalize_environment(value: str) -> str:
+    env = value.strip().lower()
+    if env not in _ENV_DATABASE_FIELDS:
+        allowed = ", ".join(sorted(_ENV_DATABASE_FIELDS))
+        raise ValueError(f"ENVIRONMENT must be one of: {allowed} (got {value!r})")
+    return env
+
+
+def alembic_stage_from_x_arguments(x: dict[str, str]) -> str | None:
+    """`alembic -x test=true` or `-x database=staging`. Default: ENVIRONMENT."""
+    if x.get("test", "").lower() == "true":
+        return "test"
+    raw = (x.get("database") or "").strip()
+    return raw or None
+
+
+def database_url_for(settings: Settings, stage: str | None = None) -> str:
+    """URL for ENVIRONMENT, or an Alembic `-x database=` / `-x test=true` override."""
+    raw = (stage or settings.environment).strip().lower()
+    env = _ALEMBIC_STAGE_ALIASES.get(raw)
+    if env is None:
+        allowed = ", ".join(sorted(_ENV_DATABASE_FIELDS))
+        raise ValueError(f"database stage must be one of: {allowed} (got {stage!r})")
+    field, env_name = _ENV_DATABASE_FIELDS[env]
+    url = getattr(settings, field)
+    if not url or not str(url).strip():
+        raise ValueError(f"{env_name} is required when targeting {env}")
+    return str(url).strip()
+
+
+def database_url_readonly_for(settings: Settings, stage: str | None = None) -> str:
+    """SELECT-only URL for Cursor / analysis. Not used by FastAPI or Alembic."""
+    raw = (stage or settings.environment).strip().lower()
+    env = _ALEMBIC_STAGE_ALIASES.get(raw)
+    if env is None:
+        allowed = ", ".join(sorted(_ENV_DATABASE_READONLY_FIELDS))
+        raise ValueError(f"database stage must be one of: {allowed} (got {stage!r})")
+    field, env_name = _ENV_DATABASE_READONLY_FIELDS[env]
+    url = getattr(settings, field)
+    if not url or not str(url).strip():
+        raise ValueError(f"{env_name} is required for read-only access to {env}")
+    return str(url).strip()
 
 
 class Settings(BaseSettings):
@@ -10,16 +87,26 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
-        extra="ignore",
+        extra="forbid",
     )
 
     # Required — set in backend/.env (see .env.example)
     environment: str
-    database_url: str
-    test_database_url: str | None = None
     redis_url: str
     secret_key: str
     allowed_origins: str
+
+    # Stage URLs — ENVIRONMENT selects the process bind (admin). Unused stages may be omitted.
+    dev_database_url: str | None = None
+    test_database_url: str | None = None
+    staging_database_url: str | None = None
+    production_database_url: str | None = None
+
+    # Read-only — Cursor / analysis (SELECT). Not used by FastAPI or Alembic.
+    dev_database_url_readonly: str | None = None
+    test_database_url_readonly: str | None = None
+    staging_database_url_readonly: str | None = None
+    production_database_url_readonly: str | None = None
 
     keycloak_url: str
     keycloak_realm: str
@@ -59,6 +146,7 @@ class Settings(BaseSettings):
 
     # Sentry — optional
     sentry_dsn: str | None = None
+    sentry_release: str | None = None
     sentry_enable_in_test: bool = False
     sentry_send_default_pii: bool = False
     sentry_traces_sample_rate_debug: float = 1.0
@@ -111,6 +199,22 @@ class Settings(BaseSettings):
     @property
     def celery_backend(self) -> str:
         return self.celery_result_backend or self.redis_url
+
+    @model_validator(mode="after")
+    def require_database_url_for_environment(self) -> Self:
+        if os.environ.get("DATABASE_URL", "").strip():
+            raise ValueError(_LEGACY_DATABASE_URL_MSG)
+        env = canonicalize_environment(self.environment)
+        field, env_name = _ENV_DATABASE_FIELDS[env]
+        url = getattr(self, field)
+        if not url or not str(url).strip():
+            raise ValueError(f"{env_name} is required when ENVIRONMENT={env}")
+        return self
+
+    @property
+    def database_url(self) -> str:
+        """Process bind — URL for the current ENVIRONMENT."""
+        return database_url_for(self)
 
 
 settings = Settings()

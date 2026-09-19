@@ -1,12 +1,14 @@
-# Revy — environment templates
+# Environment templates
 
-Canonical env examples for local development and production. Copy from here — do not commit real `.env` files.
+Canonical env examples. Copy from here — do not commit real `.env` files.
+
+**Initial topology:** one droplet = production. A staging droplet is added later (second host / load balancer), not at first deploy.
 
 ## Where variables live
 
-| Group | Local dev | Production droplet | GitHub Actions |
-|-------|-----------|-------------------|----------------|
-| Backend | `backend/.env` | `/mnt/app/backend/.env` | `CI_*` test secrets |
+| Group | Local dev | Production droplet (initial) | GitHub Actions |
+|-------|-----------|------------------------------|----------------|
+| Backend | `backend/.env` | `/mnt/app_volume/backend/.env` | `CI_*` test secrets; deploy SSHs to the droplet |
 | Frontend `VITE_*` | `frontend/.env.local` | Baked at CI build — **not** on droplet | Repository secrets |
 | Keycloak | — | `/mnt/app_volume/keycloak/config/` | `deploy/keycloak/config/` |
 | Deploy | — | — | `DOCR_TOKEN`, `DROPLET_IP`, `SSH_PRIVATE_KEY` |
@@ -16,12 +18,15 @@ Production frontend is static `serve -s dist` — changing `VITE_*` requires **r
 
 **Production URLs (placeholders):** SPA/API `https://app.example.com`, Keycloak `https://auth.app.example.com` (not `/auth` on the app host).
 
+Laptop `ENVIRONMENT=development` → `DEV_DATABASE_URL`. The production droplet file has `ENVIRONMENT=production` → `PRODUCTION_DATABASE_URL`. GitHub Actions runs `alembic upgrade head` on that droplet — not from a laptop. `backend.env.staging.example` is for a later second droplet.
+
 ## Files
 
 | File | Copy to |
 |------|---------|
 | `backend/.env.example` | `backend/.env` (local dev — canonical) |
-| `backend.env.production.example` | droplet `/mnt/app/backend/.env` (deploy phase) |
+| `backend.env.staging.example` | Later: staging droplet `/mnt/app_volume/backend/.env` (not initial) |
+| `backend.env.production.example` | production droplet `/mnt/app_volume/backend/.env` (initial deploy) |
 | `frontend.env.local.example` | `frontend/.env.local` |
 | `frontend.env.production.example` | GitHub Actions secrets (build-time `VITE_*`) |
 | `github-actions.secrets.example` | GitHub → Settings → Secrets checklist |
@@ -31,7 +36,7 @@ Production frontend is static `serve -s dist` — changing `VITE_*` requires **r
 
 ```bash
 cp backend/.env.example backend/.env
-# Set DATABASE_URL / TEST_DATABASE_URL to your DO managed cluster (see deploy/sql/postgres-extensions.sql)
+# Set ENVIRONMENT=development plus DEV_DATABASE_URL / TEST_DATABASE_URL (see deploy/sql/postgres-extensions.sql)
 docker compose -f backend/docker-compose.yml up -d   # Redis only
 ```
 

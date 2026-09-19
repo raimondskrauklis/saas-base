@@ -7,8 +7,9 @@ from app.core.config import Settings
 
 def _base_settings_kwargs() -> dict:
     return {
+        "_env_file": None,
         "environment": "development",
-        "database_url": "postgresql+asyncpg://localhost/app",
+        "dev_database_url": "postgresql+asyncpg://localhost/app",
         "redis_url": "redis://localhost:6379/0",
         "secret_key": "test",
         "allowed_origins": "http://localhost:5173",

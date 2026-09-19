@@ -20,6 +20,9 @@ Python 3.12+, FastAPI, SQLAlchemy 2.0 async, Pydantic v2, PostgreSQL, Celery.
 
 - SQLAlchemy 2.0 `Mapped` syntax — ❌ NO SQLModel
 - All DB I/O **async**
+- `ENVIRONMENT` selects `DEV_` / `TEST_` / `STAGING_` / `PRODUCTION_DATABASE_URL` (admin).
+- Local Alembic: `upgrade head` (dev) and `-x test=true` (test). Production is migrated on the droplet by GitHub Actions (`alembic upgrade head` with `ENVIRONMENT=production`). Staging droplet is later, not the initial topology.
+- Retrieve / analyse (Cursor): `*_DATABASE_URL_READONLY` + `database_url_readonly_for`. Never rewrite `DEV_DATABASE_URL` to the readonly user. SSL: `docs/utils/DATABASE_CONNECTION_GUIDE.md`.
 - Migrations: hand-written Alembic only — ❌ **NEVER** `--autogenerate`
 - Migration module docstring: short table/change label only (no phase tags, no plan refs)
 
@@ -41,7 +44,8 @@ Python 3.12+, FastAPI, SQLAlchemy 2.0 async, Pydantic v2, PostgreSQL, Celery.
 
 ## Tests
 
-- `tests/unit/` only — service layer, mocks
-- ❌ NO new tests under `tests/api/` or `tests/service/`
+- `tests/unit/` — service layer, mocks (default)
+- `tests/api/` — HTTP contract smokes against `TEST_DATABASE_URL` (L1 seed)
+- ❌ NO tests under `tests/service/`
 
 **Patterns:** `internal-docs/starter-pack/docs/backend/AGENT_PATTERNS.md`

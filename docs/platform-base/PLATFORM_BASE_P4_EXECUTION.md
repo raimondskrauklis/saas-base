@@ -12,7 +12,7 @@ Do not ask Continue?. After each Deliverable, next heading. After the ship gate,
 
 - Q14: P1 product grep **plus** `.cursor/`.
 - Q16: L1 seed + `tests/api/` smokes in this phase (before tag). Playwright **not** here.
-- Findings P4 table: pytest, npm test, alembic head `2026_07_26_1910_0011_keycloak_webhook_deliveries_received_at_idx`, no `0004` github_installations file, no `0018`, Mode A on **new** Postgres+KC (not Revy staging).
+- Findings P4 table: pytest, npm test, alembic head `2026_09_19_2000_0012_workspace_memberships_updated_at`, no `0004` github_installations file, no `0018`, Mode A on **new** Postgres+KC (not Revy staging).
 - Tag `saas-base-v2` on `raimondskrauklis/saas-base` **after** the ship-gate commit. Record the peeled SHA in a **second** docs commit (never amend the tag commit; never write SHA in P4.4).
 - Short consumer copy recipe = Q8 whole tree minus Out-list (do not copy into Irbene yet).
 - Do **not** clear `active_program` here (P6 closeout).
@@ -49,13 +49,13 @@ test ! -d docs/review-pipeline
 ```bash
 cd backend && pipenv run pytest tests/unit/ tests/api/ -q
 cd frontend && npm test
-cd backend && pipenv run alembic heads | grep -q '2026_07_26_1910_0011_keycloak_webhook_deliveries_received_at_idx'
+cd backend && pipenv run alembic heads | grep -q '2026_09_19_2000_0012_workspace_memberships_updated_at'
 cd backend && pipenv run alembic history | rg -n '0004_github_installations|0018_github_pull_request' && exit 1 || true
 ```
 
 ## P4.3 — Mode A smoke on new DBs
 
-**What:** Follow `docs/platform-base/APP_REPLACE.md` start steps and `docs/starter-pack/DEV_BOOTSTRAP.md` against **this clone’s** Postgres (`DATABASE_URL` / `TEST_DATABASE_URL`) + **this clone’s** Keycloak. Not Revy, not a hosted template IdP. Register in KC → SPA callback → `GET /api/v1/me` returns `active` and a `users` row. JIT is enough (Q17); webhook optional. Record pass/fail in findings P4 table. **If Postgres or Keycloak is down, fail this phase — do not skip smoke.**
+**What:** Follow `docs/platform-base/APP_REPLACE.md` start steps and `docs/starter-pack/DEV_BOOTSTRAP.md` against **this clone’s** Postgres (`DEV_DATABASE_URL` / `TEST_DATABASE_URL`) + **this clone’s** Keycloak. Not Revy, not a hosted template IdP. Register in KC → SPA callback → `GET /api/v1/me` returns `active` and a `users` row. JIT is enough (Q17); webhook optional. Record pass/fail in findings P4 table. **If Postgres or Keycloak is down, fail this phase — do not skip smoke.**
 **Files:** `docs/platform-base/PLATFORM_BASE_FINDINGS.md` (P4 verification rows)
 **Deliverable:** findings P4 table all green; `cd backend && pipenv run python -c "from app.core.config import settings; assert 'revy' not in (settings.database_url or '')"`
 
@@ -71,7 +71,7 @@ cd backend && pipenv run alembic history | rg -n '0004_github_installations|0018
 cd backend && pipenv run ruff check . && pipenv run pytest tests/unit/ tests/api/ -q
 cd frontend && npm run lint && npm test
 rg -n 'github_installation|features/installations|tokens\.revy' backend frontend deploy .cursor && exit 1 || true
-cd backend && pipenv run alembic heads | grep -q '2026_07_26_1910_0011_keycloak_webhook_deliveries_received_at_idx'
+cd backend && pipenv run alembic heads | grep -q '2026_09_19_2000_0012_workspace_memberships_updated_at'
 test ! -f frontend/playwright.config.ts
 ```
 

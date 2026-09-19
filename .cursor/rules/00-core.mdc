@@ -16,3 +16,4 @@ alwaysApply: true
 7. **i18n day one** — EN + LV; all user-facing strings via `t()`.
 8. **Theme** — `--app-*` tokens with light + dark in `tokens.css` only. No brand overlay file.
 9. **Authority** — committed runbooks: `docs/starter-pack/`; full patterns: `internal-docs/starter-pack/`.
+10. **DB analysis** — retrieve data with `*_DATABASE_URL_READONLY` (`database_url_readonly_for`). Never the admin URL. Guide: `docs/utils/DATABASE_CONNECTION_GUIDE.md`.

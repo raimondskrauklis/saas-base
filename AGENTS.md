@@ -73,8 +73,8 @@ Root [`.cursorrules`](.cursorrules) is a short pointer. Full Revy-string generic
 - Lists: cursor pagination (`CursorParams`, `CursorResponse`).
 - ORM: `*ORM` suffix, enums in `app/constants/enums.py` (`snake_case` values).
 - Migrations: hand-written Alembic — **never** `--autogenerate`.
-- Tests: `backend/tests/unit/` only.
-- Run from `backend/`: `pipenv run lint`, `pipenv run pytest tests/unit/`.
+- Tests: `backend/tests/unit/` (mocked) + `backend/tests/api/` (HTTP smokes). No `tests/service/`.
+- Run from `backend/`: `pipenv run lint`, `pipenv run pytest tests/unit/ tests/api/`.
 
 ## Frontend quick ref
 

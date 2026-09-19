@@ -54,7 +54,9 @@ def test_init_sentry_calls_sdk_when_enabled():
                     with patch.object(sentry_module.settings, "sentry_send_default_pii", False):
                         with patch.object(sentry_module.settings, "sentry_traces_sample_rate_debug", 1.0):
                             with patch.object(sentry_module.settings, "sentry_traces_sample_rate_prod", 0.1):
-                                with patch.object(sentry_module.sentry_sdk, "init") as init:
-                                    sentry_module.init_sentry()
-                                    init.assert_called_once()
-                                    assert init.call_args.kwargs["dsn"] == "https://example@o0.ingest.sentry.io/1"
+                                with patch.object(sentry_module.settings, "sentry_release", None):
+                                    with patch.object(sentry_module.sentry_sdk, "init") as init:
+                                        sentry_module.init_sentry()
+                                        init.assert_called_once()
+                                        assert init.call_args.kwargs["dsn"] == "https://example@o0.ingest.sentry.io/1"
+                                        assert init.call_args.kwargs["release"] == "1.0.0"

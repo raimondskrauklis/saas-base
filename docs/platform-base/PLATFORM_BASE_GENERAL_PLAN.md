@@ -4,7 +4,7 @@ From [PLATFORM_BASE_FINDINGS.md](./PLATFORM_BASE_FINDINGS.md). **No file lists o
 
 **Homes:** P0–P4 in the **template repo** (this tree). P5–P6 in the **consumer** `../irbene_gate`.
 
-**Cross-cutting (every phase):** unit tests; EN+LV for any user-facing string change; hand-written Alembic with **full** `revision` strings (never `--autogenerate`); generic `<app>` names (no new `revy` brand); do not touch Revy staging DBs. Template `TEST_DATABASE_URL` is a new DB (Q15).
+**Cross-cutting (every phase):** unit tests; EN+LV for any user-facing string change; hand-written Alembic with **full** `revision` strings (never `--autogenerate`); generic `<app>` names (no new `revy` brand); do not touch Revy staging DBs. Four template DBs (Q15); `ENVIRONMENT` selects the process URL.
 
 **Push (template repo, GitHub without Revy):** P0 `local` (done). P1 `first-push`. P2–P3 `local`. P4 `batch`. Follow the program README Push column; do not invent a fourth kind; no Revy poll (`integrations.revy` is false). Consumer P5 `first-push`, P6 `batch` on the Irbene remote.
 

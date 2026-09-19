@@ -48,7 +48,6 @@ jobs:
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
       SENTRY_ENABLE_IN_TEST: "true"
       ENVIRONMENT: test
-      DATABASE_URL: ${{ secrets.CI_TEST_DATABASE_URL }}
       TEST_DATABASE_URL: ${{ secrets.CI_TEST_DATABASE_URL }}
       KEYCLOAK_URL: ${{ secrets.CI_KEYCLOAK_URL }}
       KEYCLOAK_REALM: ${{ secrets.CI_KEYCLOAK_REALM }}
@@ -161,7 +160,7 @@ jobs:
         if: ${{ env.SKIP_CI_TESTS != 'true' }}
         run: |
           cd backend
-          pytest tests/unit/ -v --tb=short
+          pytest tests/unit/ tests/api/ -v --tb=short
           echo "✅ All backend tests passed"
 
       - name: Remove GitHub Runner IP from DO Managed Database firewall
