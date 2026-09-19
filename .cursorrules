@@ -1,6 +1,8 @@
-# Revy — Cursor rules (pointer)
+# saas-base — Cursor rules (pointer)
 
-Read **AGENTS.md** for the agent entry point, doc index, and Revy product context.
+Read **AGENTS.md** for the agent entry point and doc index.
+
+**Migrations: hand-written Alembic only. Never `alembic revision --autogenerate`.** Full `revision` / `down_revision` strings (`YYYY_MM_DD_HHMM_NNNN_slug`). Detail: `.cursor/rules/backend-python.mdc`.
 
 Detailed rules: **`.cursor/rules/`** (modular `.mdc` files):
 

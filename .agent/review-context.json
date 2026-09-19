@@ -3,11 +3,11 @@
   "programs": [
     {
       "id": "platform-base",
-      "scope": ["backend/**", "frontend/**"],
+      "scope": ["backend/**", "frontend/**", "deploy/**"],
       "paths": [
-        { "path": "docs/README.md", "description": "execution" },
-        { "path": "docs/PLATFORM_BASE_FINDINGS.md", "description": "findings" },
-        { "path": "docs/PLATFORM_BASE_GENERAL_PLAN.md", "description": "general plan" }
+        { "path": "docs/platform-base/README.md", "description": "execution" },
+        { "path": "docs/platform-base/PLATFORM_BASE_FINDINGS.md", "description": "findings" },
+        { "path": "docs/platform-base/PLATFORM_BASE_GENERAL_PLAN.md", "description": "general plan" }
       ]
     }
   ],

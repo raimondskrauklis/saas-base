@@ -2,11 +2,11 @@
 
 **Active program:** platform-base — freeze a clean SaaS template from `saas-base-v1.1` + Auth #32, no Revy product.
 
-When reviewing changes in scope `backend/**` and `frontend/**`, treat these as authoritative:
+When reviewing changes in scope `backend/**`, `frontend/**`, and `deploy/**`, treat these as authoritative:
 
-- [PLATFORM_BASE_P0_EXECUTION.md](../docs/PLATFORM_BASE_P0_EXECUTION.md) — execution contract
-- [PLATFORM_BASE_FINDINGS.md](../docs/PLATFORM_BASE_FINDINGS.md) — locked decisions
-- [PLATFORM_BASE_GENERAL_PLAN.md](../docs/PLATFORM_BASE_GENERAL_PLAN.md) — phase goals
+- [PLATFORM_BASE_P0_EXECUTION.md](../docs/platform-base/PLATFORM_BASE_P0_EXECUTION.md) — execution contract
+- [PLATFORM_BASE_FINDINGS.md](../docs/platform-base/PLATFORM_BASE_FINDINGS.md) — locked decisions
+- [PLATFORM_BASE_GENERAL_PLAN.md](../docs/platform-base/PLATFORM_BASE_GENERAL_PLAN.md) — phase goals
 
 **Agent workflow:**
 

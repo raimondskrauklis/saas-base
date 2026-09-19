@@ -30,9 +30,6 @@ export function QuickActionsWidget() {
         <Link to="/settings/profile" className={linkClassName}>
           {t('dashboard.quickActions.settings')}
         </Link>
-        <Link to="/installations" className={linkClassName}>
-          {t('dashboard.quickActions.installations')}
-        </Link>
         {canInvite ? (
           <Link to="/settings/team" className={linkClassName}>
             {t('dashboard.quickActions.inviteTeammate')}

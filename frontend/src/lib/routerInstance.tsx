@@ -19,7 +19,6 @@ import { TeamSettingsPage } from '@/features/settings/pages/TeamSettingsPage';
 import { IntegrationsSettingsPage } from '@/features/settings/pages/IntegrationsSettingsPage';
 import { BillingSettingsPage } from '@/features/settings/pages/BillingSettingsPage';
 import { DangerZonePage } from '@/features/settings/pages/DangerZonePage';
-import { InstallationsPage } from '@/features/installations/pages/InstallationsPage';
 import { adminRoutes } from '@/features/admin/routes';
 
 export const appRouter = createBrowserRouter([
@@ -86,11 +85,6 @@ export const appRouter = createBrowserRouter([
         path: '/dashboard',
         element: <AppShellLayout />,
         children: [{ index: true, element: <DashboardPage /> }],
-      },
-      {
-        path: '/installations',
-        element: <AppShellLayout />,
-        children: [{ index: true, element: <InstallationsPage /> }],
       },
       {
         path: '/settings',

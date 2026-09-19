@@ -71,22 +71,6 @@ class Settings(BaseSettings):
     mailgun_region: str = "eu"
     mailgun_webhook_signing_key: str | None = None
 
-    # GitHub App
-    github_app_id: str | None = None
-    github_app_private_key_path: str | None = None
-    github_webhook_secret: str | None = None
-    revy_bot_login: str = "revy[bot]"
-
-    # Model providers
-    moonshot_api_key: str | None = None
-    anthropic_api_key: str | None = None
-    voyage_api_key: str | None = None
-
-    # Revy runtime paths (outside repo — see .env.example)
-    revy_repos_root: str | None = None
-    revy_worktrees_root: str | None = None
-    revy_hf_cache_path: str | None = None
-
     # Stripe billing — disabled by default; set STRIPE_ENABLED=true with keys in production
     stripe_enabled: bool = False
     stripe_secret_key: str | None = None
@@ -98,12 +82,6 @@ class Settings(BaseSettings):
     # Data export — ACCOUNT_LIFECYCLE.md
     export_storage_path: str = "/tmp/revy/exports"
     export_ttl_days: int = 7
-
-    # Review policy
-    revy_default_review_profile: str = "standard"
-    revy_revision_timeout_standard_seconds: int = 900
-    revy_revision_timeout_deep_seconds: int = 1500
-    revy_revision_timeout_critical_seconds: int = 1800
 
     @property
     def keycloak_token_issuer(self) -> str:

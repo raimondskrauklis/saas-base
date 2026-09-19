@@ -40,7 +40,7 @@ Not installed: `babysit-revy-pr` (GitHub without Revy), Sentry, docs export, sta
 
 | Topic | Where |
 |-------|--------|
-| **Platform-base program** | [docs/README.md](docs/README.md) |
+| **Platform-base program** | [docs/platform-base/README.md](docs/platform-base/README.md) |
 | **Dev bootstrap** | [docs/starter-pack/DEV_BOOTSTRAP.md](docs/starter-pack/DEV_BOOTSTRAP.md) |
 | **Keycloak (dev/prod)** | [docs/starter-pack/KEYCLOAK_DEV_CHECKLIST.md](docs/starter-pack/KEYCLOAK_DEV_CHECKLIST.md) |
 | **Registration flags** | [docs/starter-pack/REGISTRATION_FLAGS.md](docs/starter-pack/REGISTRATION_FLAGS.md) |

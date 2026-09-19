@@ -7,7 +7,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision = "2026_07_25_2217_0005_user_locale_timezone"
-down_revision = "2026_07_24_0300_0004_github_installations"
+down_revision = "2026_07_24_0200_0003_invitations"
 branch_labels = None
 depends_on = None
 

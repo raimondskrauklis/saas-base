@@ -25,16 +25,16 @@
   --app-table-row-alt: var(--app-chip);
 
   /* CTA */
-  --app-cta-bg: #0F172A;
+  --app-cta-bg: #6366f1;
   --app-cta-fg: #FFFFFF;
 
   /* Semantic */
-  --app-primary: #4F46E5;
+  --app-primary: #6366f1;
   --app-primary-foreground: #FFFFFF;
   --app-link: var(--app-primary);
   --app-success: #0D9488;
   --app-warning: #D97706;
-  --app-info: #4F46E5;
+  --app-info: #6366f1;
   --app-danger: #E11D48;
   --app-on-accent: var(--app-primary-foreground);
 
@@ -81,15 +81,15 @@ html.dark {
   --app-table-row: var(--app-surface);
   --app-table-row-alt: var(--app-chip);
 
-  --app-cta-bg: #F8FAFC;
-  --app-cta-fg: #020617;
+  --app-cta-bg: #818cf8;
+  --app-cta-fg: #ffffff;
 
-  --app-primary: #818CF8;
+  --app-primary: #818cf8;
   --app-primary-foreground: #FFFFFF;
   --app-link: var(--app-primary);
   --app-success: #2DD4BF;
   --app-warning: #FBBF24;
-  --app-info: #818CF8;
+  --app-info: #818cf8;
   --app-danger: #FB7185;
   --app-on-accent: var(--app-primary-foreground);
 

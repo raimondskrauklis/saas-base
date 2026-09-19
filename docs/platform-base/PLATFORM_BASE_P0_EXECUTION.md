@@ -2,18 +2,19 @@
 
 Phase **P0** of [`PLATFORM_BASE_GENERAL_PLAN.md`](./PLATFORM_BASE_GENERAL_PLAN.md). Baseline: [`PLATFORM_BASE_FINDINGS.md`](./PLATFORM_BASE_FINDINGS.md). **P0 only.**
 
-**Goal:** This directory is a git repo whose history is the frozen shell through `saas-base-v1.1`, program `docs/` still here, private GitHub remote exists, no push yet.
+**Goal:** This directory is a git repo whose history is the frozen shell through `saas-base-v1.1`, program docs in `docs/platform-base/`, private GitHub remote exists, no push yet.
 
 **Push:** local
 
-Do not ask Continue?. After each Deliverable, next heading. After the ship gate, stop (Next: none — P1 execution not written yet).
+Do not ask Continue?. After each Deliverable, next heading. After the ship gate, open Next immediately.
 
 ## Decisions locked for P0
 
 - Import **into** `/Users/raimonds.krauklis/projects/saas-base`. Never `git clone` Revy (or any URL) as this folder — that wipes `docs/`.
+- Program docs live in `docs/platform-base/`, not `docs/` root (shell already has `starter-pack/`, `saas-base/`, `review-pipeline/`).
 - History from `0db2f60` through tag `saas-base-v1.1` commit `48c361e20081bd71a4cbf176c9ba71bd09869082` only. No squash. Do not fetch `revy/main` or `ed773f4`.
 - Source: local `/Users/raimonds.krauklis/projects/revy` (fetch by path). Not a nested clone inside this tree.
-- Preserve program files: `docs/README.md`, `docs/PLATFORM_BASE_*.md`, `docs/agents/`, `docs/utils/CURSOR_AGENT_WORKFLOW.md`, `.agent/`, pack skills, this execution file.
+- Preserve program files: `docs/platform-base/`, `docs/agents/`, `docs/utils/CURSOR_AGENT_WORKFLOW.md`, `.agent/`, pack skills, this execution file.
 - After checkout: keep shell `.cursorrules` and `.cursor/rules/`. Overlay pack skills from `../agent-workflow`. Remove legacy `babysit-pr`. Do **not** install `babysit-revy-pr`. Do **not** copy kp-platform `.cursorrules`.
 - Hosting: GitHub **without** Revy. Create private `raimondskrauklis/saas-base` and add `origin`. Do **not** push.
 - SSOT is `.agent/review-context.json` (no `.revy/`).
@@ -32,7 +33,7 @@ Do not ask Continue?. After each Deliverable, next heading. After the ship gate,
 
 ## P0.0 — Program PR review context
 
-**What:** Wire `.agent/review-context.json` + `.cursor/BUGBOT.md`. One `programs[]` entry `platform-base`. Scope `backend/**` and `frontend/**` (imported tree is full-stack). Omit `rule_packs` (`manifest.review_context.rule_packs` is null). Keep `rule_packs_catalog` as `{}`. Bugbot: three program docs only. Do not ask which packs. Do not create `.revy/`.
+**What:** Wire `.agent/review-context.json` + `.cursor/BUGBOT.md`. One `programs[]` entry `platform-base`. Scope `backend/**`, `frontend/**`, and `deploy/**` (imported tree is full-stack). Omit `rule_packs` (`manifest.review_context.rule_packs` is null). Keep `rule_packs_catalog` as `{}`. Bugbot: three program docs only. Do not ask which packs. Do not create `.revy/`. **P0 is landed — do not re-execute this subphase** (LOOP starts at P1). The JSON below is the current SSOT snapshot, not a rewrite ticket.
 **Files:** `.agent/review-context.json`, `.cursor/BUGBOT.md`
 **Deliverable:** `python3 -m json.tool .agent/review-context.json`
 
@@ -42,11 +43,11 @@ Do not ask Continue?. After each Deliverable, next heading. After the ship gate,
   "programs": [
     {
       "id": "platform-base",
-      "scope": ["backend/**", "frontend/**"],
+      "scope": ["backend/**", "frontend/**", "deploy/**"],
       "paths": [
-        { "path": "docs/README.md", "description": "execution" },
-        { "path": "docs/PLATFORM_BASE_FINDINGS.md", "description": "findings" },
-        { "path": "docs/PLATFORM_BASE_GENERAL_PLAN.md", "description": "general plan" }
+        { "path": "docs/platform-base/README.md", "description": "execution" },
+        { "path": "docs/platform-base/PLATFORM_BASE_FINDINGS.md", "description": "findings" },
+        { "path": "docs/platform-base/PLATFORM_BASE_GENERAL_PLAN.md", "description": "general plan" }
       ]
     }
   ],
@@ -57,13 +58,13 @@ Do not ask Continue?. After each Deliverable, next heading. After the ship gate,
 ## P0.1 — Import shell history into this tree
 
 **What:** Backup the overlay. `git init` here. `git fetch` the **tag only** from local `../revy`. Point `main` at `saas-base-v1.1`. Restore the overlay on top. Never clone into this directory.
-**Files:** `.git/` (new), restored `docs/PLATFORM_BASE_*`, `docs/README.md`, `docs/agents/`, `.agent/`, `.cursor/skills/` (pack), `AGENTS.md` overlay notes
+**Files:** `.git/` (new), restored `docs/platform-base/`, `docs/agents/`, `.agent/`, `.cursor/skills/` (pack), `AGENTS.md` overlay notes
 **Deliverable:**
 
 ```bash
-test -f docs/PLATFORM_BASE_FINDINGS.md
-test -f docs/PLATFORM_BASE_GENERAL_PLAN.md
-test -f docs/PLATFORM_BASE_P0_EXECUTION.md
+test -f docs/platform-base/PLATFORM_BASE_FINDINGS.md
+test -f docs/platform-base/PLATFORM_BASE_GENERAL_PLAN.md
+test -f docs/platform-base/PLATFORM_BASE_P0_EXECUTION.md
 test "$(git rev-parse saas-base-v1.1^{commit})" = "48c361e20081bd71a4cbf176c9ba71bd09869082"
 git merge-base --is-ancestor 0db2f60 HEAD
 git cat-file -e ed773f4^{commit} 2>/dev/null && echo FAIL_fetched_auth32 && exit 1 || true
@@ -76,7 +77,7 @@ Exact import (do not substitute a clone):
 TARGET=/Users/raimonds.krauklis/projects/saas-base
 REVY=/Users/raimonds.krauklis/projects/revy
 BACKUP=$(mktemp -d /tmp/saas-base-overlay.XXXXXX)
-# copy overlay: docs/README.md, docs/PLATFORM_BASE_*, docs/agents, docs/utils/CURSOR_AGENT_WORKFLOW.md,
+# copy overlay: docs/platform-base/, docs/agents, docs/utils/CURSOR_AGENT_WORKFLOW.md,
 # .agent, .cursor (pack skills + BUGBOT), AGENTS.md, this execution file if not under docs/ already
 cd "$TARGET"
 git init -b main
@@ -88,8 +89,8 @@ git switch -c feat/platform-base
 
 ## P0.2 — README is the generic shell
 
-**What:** Replace root `README.md` (imported Revy blurb) with a generic saas-base README. Keep layout/quick-start pointers to `docs/starter-pack/DEV_BOOTSTRAP.md`. Point program work at `docs/README.md`. Do not rewrite starter-pack runbooks.
-**Files:** `README.md`, `docs/README.md` (execution table)
+**What:** Replace root `README.md` (imported Revy blurb) with a generic saas-base README. Keep layout/quick-start pointers to `docs/starter-pack/DEV_BOOTSTRAP.md`. Point program work at `docs/platform-base/README.md`. Do not rewrite starter-pack runbooks.
+**Files:** `README.md`, `docs/platform-base/README.md` (execution table)
 **Deliverable:** `grep -n 'GitHub reviewer\|AI-assisted code review' README.md && exit 1 || true; head -20 README.md`
 
 ## P0.3 — Re-apply agent-workflow overlay
@@ -113,7 +114,7 @@ git switch -c feat/platform-base
 ```bash
 git log -1 --decorate
 git merge-base --is-ancestor 48c361e20081bd71a4cbf176c9ba71bd09869082 HEAD
-test -f docs/PLATFORM_BASE_FINDINGS.md
+test -f docs/platform-base/PLATFORM_BASE_FINDINGS.md
 test -f backend/Pipfile
 test -f frontend/package.json
 ```
@@ -124,9 +125,9 @@ test -f frontend/package.json
 test "$(git rev-parse saas-base-v1.1^{commit})" = "48c361e20081bd71a4cbf176c9ba71bd09869082"
 git merge-base --is-ancestor 0db2f60 HEAD
 git merge-base --is-ancestor 48c361e20081bd71a4cbf176c9ba71bd09869082 HEAD
-test -f docs/PLATFORM_BASE_FINDINGS.md
-test -f docs/PLATFORM_BASE_GENERAL_PLAN.md
-test -f docs/PLATFORM_BASE_P0_EXECUTION.md
+test -f docs/platform-base/PLATFORM_BASE_FINDINGS.md
+test -f docs/platform-base/PLATFORM_BASE_GENERAL_PLAN.md
+test -f docs/platform-base/PLATFORM_BASE_P0_EXECUTION.md
 python3 -m json.tool .agent/review-context.json >/dev/null
 python3 -m json.tool .agent/manifest.json >/dev/null
 git remote get-url origin | grep -q 'raimondskrauklis/saas-base'
@@ -138,7 +139,7 @@ No backend pytest this phase (no Python app edits; venv not required).
 
 ## LOOP ship gate
 
-Do not ask Continue?. After this gate, Next is none (P1 execution not written).
+Do not ask Continue?. After this gate, open the Next file immediately.
 Pause LOOP only if a subphase above said Pause LOOP (migration).
 
 1. Branch — not main (`feat/platform-base`)
@@ -156,4 +157,4 @@ END REPEAT
 7. Update README status row.
 8. Open Next immediately.
 
-**Next:** none
+**Next:** [`PLATFORM_BASE_P1_EXECUTION.md`](./PLATFORM_BASE_P1_EXECUTION.md)

@@ -5,7 +5,6 @@ import type { MeUser } from '@/lib/me';
 export interface ChecklistContext {
   workspaceId: string | null;
   memberCount: number;
-  installationCount: number;
   plan: string;
 }
 
@@ -38,13 +37,6 @@ export const CHECKLIST_STEPS: ChecklistStep[] = [
     href: '/settings/team',
     available: (me) => hasPermission(me.role ?? undefined, 'admin:users', me.platform_role ?? undefined),
     isComplete: (_me, ctx) => ctx.memberCount > 1,
-  },
-  {
-    id: 'connect_integration',
-    labelKey: 'dashboard.checklist.connectIntegration',
-    href: '/installations',
-    available: true,
-    isComplete: (_me, ctx) => ctx.installationCount > 0,
   },
   {
     id: 'setup_billing',

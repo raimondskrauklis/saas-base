@@ -4,7 +4,6 @@
 from app.models.audit_log import AuditLogORM
 from app.models.base import AuditableModel, Base, TimestampedModel, utc_now
 from app.models.data_export_job import DataExportJobORM
-from app.models.github_installation import GitHubInstallationORM
 from app.models.impersonation_session import ImpersonationSessionORM
 from app.models.invitations import WorkspaceInvitationORM
 from app.models.items import ItemORM
@@ -17,7 +16,6 @@ __all__ = [
     "AuditableModel",
     "Base",
     "DataExportJobORM",
-    "GitHubInstallationORM",
     "ImpersonationSessionORM",
     "ItemORM",
     "TimestampedModel",

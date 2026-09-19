@@ -24,7 +24,6 @@ function baseUser(overrides: Partial<MeUser> = {}): MeUser {
 const baseContext = {
   workspaceId: 'ws-1',
   memberCount: 1,
-  installationCount: 0,
   plan: 'free',
 };
 
@@ -80,7 +79,6 @@ describe('checklistSteps', () => {
       hasIncompleteChecklistSteps(baseUser(), {
         ...baseContext,
         memberCount: 2,
-        installationCount: 1,
         plan: 'pro',
       }),
     ).toBe(false);

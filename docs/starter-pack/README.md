@@ -19,9 +19,8 @@ Execution plans peer-reviewed (final pass 2026-07-24) — see findings § Peer r
 | P1 — Runnable dev platform | [SCAFFOLD_P1_EXECUTION.md](./SCAFFOLD_P1_EXECUTION.md) | Done (2026-07-24) — human Keycloak smoke pending |
 | P2 — Registration & platform flows | [SCAFFOLD_P2_EXECUTION.md](./SCAFFOLD_P2_EXECUTION.md) | Done (2026-07-24) |
 | P3 — Shared platform hardening | [SCAFFOLD_P3_EXECUTION.md](./SCAFFOLD_P3_EXECUTION.md) | Done (2026-07-24) |
-| P4 — Revy product foundation | [SCAFFOLD_P4_EXECUTION.md](./SCAFFOLD_P4_EXECUTION.md) | Done (2026-07-24) |
 | P5 — Agent & cursor identity | [SCAFFOLD_P5_EXECUTION.md](./SCAFFOLD_P5_EXECUTION.md) | Done (2026-07-25) |
 
-**Authority:** `internal-docs/starter-pack/` + `internal-docs/product/revy/` (gitignored). Committed runbooks: `DEV_BOOTSTRAP.md`, `REGISTRATION_FLAGS.md`, `KEYCLOAK_DEV_CHECKLIST.md` (P1); `REVY_PRODUCT_SLICE.md` (P4.1). Agent entry: root [`AGENTS.md`](../../AGENTS.md).
+**Authority:** `internal-docs/starter-pack/` (gitignored). Committed runbooks: `DEV_BOOTSTRAP.md`, `REGISTRATION_FLAGS.md`, `KEYCLOAK_DEV_CHECKLIST.md`. Agent entry: root [`AGENTS.md`](../../AGENTS.md).
 
-**Next:** Scaffold + SaaS base complete. **Active:** [review pipeline program](../review-pipeline/README.md) (R0–R7). CI tests: set `SKIP_CI_TESTS: "false"` in deploy workflow when Actions secrets are ready.
+**Next:** Scaffold + SaaS base complete. CI tests: set `SKIP_CI_TESTS: "false"` in deploy workflow when Actions secrets are ready.

@@ -11,7 +11,8 @@ alwaysApply: true
 2. **Production only** — no workarounds, no error silencing, no temporary fixes.
 3. **Concise output** — minimal chat; write files directly.
 4. **No docs churn** — do NOT create or update `.md` unless the user explicitly asks.
-5. **Revy domain** — GitHub installations, workspaces, code review pipeline (see `docs/starter-pack/REVY_PRODUCT_SLICE.md` and `internal-docs/product/revy/`). Not KP Analytics / procurement.
-6. **i18n day one** — EN + LV; all user-facing strings via `t()`.
-7. **Theme** — `--app-*` tokens with light + dark; brand overrides in `tokens.revy.css` only.
-8. **Authority** — committed runbooks: `docs/starter-pack/`; full patterns: `internal-docs/starter-pack/`.
+5. **Migrations** — hand-written Alembic only. ❌ **NEVER** `alembic revision --autogenerate`.
+6. **Revy domain** — GitHub installations, workspaces, code review pipeline (see `docs/starter-pack/REVY_PRODUCT_SLICE.md` and `internal-docs/product/revy/`). Not KP Analytics / procurement. (P3 retargets this to generic SaaS.)
+7. **i18n day one** — EN + LV; all user-facing strings via `t()`.
+8. **Theme** — `--app-*` tokens with light + dark; brand overrides in `tokens.revy.css` only.
+9. **Authority** — committed runbooks: `docs/starter-pack/`; full patterns: `internal-docs/starter-pack/`.

@@ -1,7 +1,6 @@
 /* frontend/src/index.css */
 @import 'tailwindcss';
 @import './styles/tokens.css';
-@import './styles/tokens.revy.css';
 @import './styles/motion.css';
 
 .app-scroll {
