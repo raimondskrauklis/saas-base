@@ -96,7 +96,7 @@ From [PLATFORM_BASE_FINDINGS.md](./PLATFORM_BASE_FINDINGS.md). **No file lists o
 
 ## Open item
 
-Calibration: the `saas-base-v2` SHA after P4 (write it back into this folder **after** the tag exists, second docs commit).
+Calibration: `saas-base-v2` = `b58c2925c96a1eacfb2ae79034e53f72d3fe7cf9` (`git rev-parse 'saas-base-v2^{commit}'`).
 
 **Deferred (not this LOOP):** Playwright E2E — findings parking lot; pick up after Mode A on `saas-base-v2`.
 

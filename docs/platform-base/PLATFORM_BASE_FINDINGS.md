@@ -210,6 +210,7 @@ Pass/fail for **clean base / template repo** (P4 gate):
 - Product grep P1-tree empty (`backend/` `frontend/` `deploy/`); `.cursor/` empty (after P3); `docs/review-pipeline/` absent. **pass**.
 - `alembic heads` = `2026_09_19_2000_0012_workspace_memberships_updated_at` (adds `workspace_memberships.updated_at` so TimestampedModel matches 0001); parent is `0011`. History has no `0004` github_installations file and no `0018`. **pass**.
 - Mode A: register in this clone’s Keycloak (`start-dev` Path A, realm `app`, clients `app-web`/`app-api`) → SPA callback → `GET /api/v1/me` **200** and `users.status = active` on `saas_base_dev`. **pass** (JIT; webhook not required). First token had `email_verified=false` until the KC user was marked verified — same fail cause as DEV_BOOTSTRAP.
+- Tag `saas-base-v2` peels to `b58c2925c96a1eacfb2ae79034e53f72d3fe7cf9`.
 
 Pass/fail for **consumer repo** (`irbene_gate`, P6 gate):
 
