@@ -1,0 +1,83 @@
+{
+  "pack_version": "2",
+  "project_name": "saas-base",
+  "docs_root": "docs",
+  "agents_docs": "docs/agents",
+  "backend_dir": "backend",
+  "frontend_dir": "frontend",
+  "default_scope": ["backend/**"],
+  "scopes": {
+    "layout": "FastAPI backend/ + React frontend/ + Keycloak in deploy/.",
+    "default": ["backend/**"],
+    "available": ["backend/**", "frontend/**", "deploy/**"],
+    "note": "Default one primary glob (backend). Full-stack programs add frontend/** in review-context programs[].scope."
+  },
+  "pack_source": {
+    "kind": "sibling",
+    "path": "../agent-workflow",
+    "url": null,
+    "pack_version": "2"
+  },
+  "hosting": {
+    "kind": "github",
+    "pr_tool": "gh",
+    "review_bot": "revy",
+    "note": "Private raimondskrauklis/saas-base. This template is not the Revy product. PRs run the Revy GitHub check (revybot). Clones set their own domain, Keycloak, and databases."
+  },
+  "test_commands": {
+    "backend_lint": "cd backend && pipenv run ruff check --fix . && pipenv run ruff check .",
+    "backend_lint_fix": "cd backend && pipenv run ruff check --fix .",
+    "backend_test": "cd backend && pipenv run pytest tests/unit/ tests/api/ -q",
+    "frontend_lint": "cd frontend && npm run lint",
+    "frontend_test": "cd frontend && npm test"
+  },
+  "review_context": {
+    "ssot": ".revy/review-context.json",
+    "product_mirror": ".agent/review-context.json",
+    "bugbot": ".cursor/BUGBOT.md",
+    "rule_packs": null
+  },
+  "integrations": {
+    "revy": false
+  },
+  "flows": {
+    "phase-loop": {
+      "enabled": true,
+      "skill": "phase-execution"
+    },
+    "ship": {
+      "enabled": true,
+      "skill": "ship-changes"
+    },
+    "revy-babysit": {
+      "enabled": true,
+      "skill": "babysit-revy-pr",
+      "note": "On demand when the user asks to poll/fix Revy PR findings — not part of default ship"
+    }
+  },
+  "skills": {
+    "catalog": ".agent/skills.catalog.json",
+    "installed": [
+      "bootstrap-workflow",
+      "phase-execution",
+      "ship-changes",
+      "chunk-execution",
+      "create-findings",
+      "create-general-plan",
+      "create-execution-plan",
+      "architecture-peer-review",
+      "execution-peer-review",
+      "devils-advocate",
+      "post-finish-gap-pass",
+      "babysit-revy-pr",
+      "sentry-fix-issues"
+    ]
+  },
+  "validation": {
+    "index_doc": null,
+    "memo_pattern": null,
+    "template_pack_path": null,
+    "metrics_scripts": [],
+    "evidence_runbook": null
+  }
+}

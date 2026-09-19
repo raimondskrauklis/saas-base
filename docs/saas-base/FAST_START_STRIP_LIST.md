@@ -25,7 +25,7 @@ When cloning Revy starter-pack + SaaS base into a **new B2B product**, remove or
 | `GITHUB_*` | Revy GitHub App |
 | Product-specific S3/bucket keys | Not in base SaaS |
 
-Keep: `KEYCLOAK_*`, `DATABASE_URL`, `STRIPE_*` (if billing — see [STRIPE_BILLING_SETUP.md](../utils/STRIPE_BILLING_SETUP.md)), `EXPORT_*`, `BOOTSTRAP_SUPER_ADMIN_EMAIL` (one-time).
+Keep: `KEYCLOAK_*`, `DEV_`/`TEST_`/`STAGING_`/`PRODUCTION_DATABASE_URL` (selected by `ENVIRONMENT`), `STRIPE_*` (if billing — see [STRIPE_BILLING_SETUP.md](../utils/STRIPE_BILLING_SETUP.md)), `EXPORT_*`, `BOOTSTRAP_SUPER_ADMIN_EMAIL` (one-time).
 
 ---
 

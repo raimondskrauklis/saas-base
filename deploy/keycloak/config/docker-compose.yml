@@ -5,15 +5,15 @@
 #   docker compose up -d
 #   curl -sf http://127.0.0.1:9000/health/ready
 #
-# Droplet path: /mnt/revy_volume/keycloak/config/
+# Droplet path: /mnt/app_volume/keycloak/config/
 
 services:
   keycloak:
     build:
       context: .
       dockerfile: Dockerfile
-    image: revy-keycloak:26.0
-    container_name: revy-kc
+    image: app-keycloak:26.0
+    container_name: app-kc
     restart: unless-stopped
     command: start --optimized
     env_file:
@@ -23,11 +23,11 @@ services:
       - "127.0.0.1:9000:9000"
     mem_limit: 1g
     networks:
-      revy-net:
+      app-net:
         aliases:
           - keycloak
 
 networks:
-  revy-net:
+  app-net:
     external: true
-    name: revy-net
+    name: app-net

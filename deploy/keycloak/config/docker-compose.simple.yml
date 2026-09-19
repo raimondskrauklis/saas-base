@@ -5,7 +5,7 @@
 services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.0
-    container_name: revy-kc
+    container_name: app-kc
     restart: unless-stopped
     command: start
     env_file:
@@ -15,11 +15,11 @@ services:
       - "127.0.0.1:9000:9000"
     mem_limit: 1g
     networks:
-      revy-net:
+      app-net:
         aliases:
           - keycloak
 
 networks:
-  revy-net:
+  app-net:
     external: true
-    name: revy-net
+    name: app-net

@@ -64,7 +64,7 @@ export function DangerZonePage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `revy-export-${exportJobId}.zip`;
+      link.download = `app-export-${exportJobId}.zip`;
       link.click();
       URL.revokeObjectURL(url);
     } catch (error) {

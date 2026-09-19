@@ -29,7 +29,6 @@ export function SetupChecklistWidget() {
   const checklistContext = {
     workspaceId,
     memberCount: context.memberCount,
-    installationCount: context.installationCount,
     plan: context.plan,
   };
 

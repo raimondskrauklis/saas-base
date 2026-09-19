@@ -38,9 +38,9 @@ def _auth_patches(*, jwks: dict, get_jwks: AsyncMock | None = None) -> ExitStack
         )
     )
     stack.enter_context(patch("app.core.auth.settings.keycloak_url", "https://auth.example"))
-    stack.enter_context(patch("app.core.auth.settings.keycloak_realm", "revy"))
-    stack.enter_context(patch("app.core.auth.settings.keycloak_client_id", "revy-api"))
-    stack.enter_context(patch("app.core.auth.settings.keycloak_frontend_client_id", "revy-web"))
+    stack.enter_context(patch("app.core.auth.settings.keycloak_realm", "app"))
+    stack.enter_context(patch("app.core.auth.settings.keycloak_client_id", "app-api"))
+    stack.enter_context(patch("app.core.auth.settings.keycloak_frontend_client_id", "app-web"))
     return stack
 
 
@@ -50,9 +50,9 @@ async def test_decode_access_token_validates_signature_and_audience():
     token = jwt.encode(
         {
             "sub": "user-1",
-            "azp": "revy-web",
-            "aud": "revy-api",
-            "iss": "https://auth.example/realms/revy",
+            "azp": "app-web",
+            "aud": "app-api",
+            "iss": "https://auth.example/realms/app",
         },
         private_pem,
         algorithm="RS256",
@@ -72,8 +72,8 @@ async def test_decode_access_token_refreshes_jwks_on_key_rotation():
     token = jwt.encode(
         {
             "sub": "user-1",
-            "azp": "revy-web",
-            "iss": "https://auth.example/realms/revy",
+            "azp": "app-web",
+            "iss": "https://auth.example/realms/app",
         },
         private_pem_new,
         algorithm="RS256",
@@ -96,8 +96,8 @@ async def test_decode_access_token_retry_path_unusable_jwks_returns_service_unav
     token = jwt.encode(
         {
             "sub": "user-1",
-            "azp": "revy-web",
-            "iss": "https://auth.example/realms/revy",
+            "azp": "app-web",
+            "iss": "https://auth.example/realms/app",
         },
         private_pem_new,
         algorithm="RS256",
@@ -120,8 +120,8 @@ async def test_decode_access_token_rejects_invalid_signature_without_refresh():
     token = jwt.encode(
         {
             "sub": "user-1",
-            "azp": "revy-web",
-            "iss": "https://auth.example/realms/revy",
+            "azp": "app-web",
+            "iss": "https://auth.example/realms/app",
         },
         other_private_pem,
         algorithm="RS256",
@@ -142,8 +142,8 @@ async def test_decode_access_token_expired_token_without_refresh():
     token = jwt.encode(
         {
             "sub": "user-1",
-            "azp": "revy-web",
-            "iss": "https://auth.example/realms/revy",
+            "azp": "app-web",
+            "iss": "https://auth.example/realms/app",
             "exp": int(time.time()) - 60,
         },
         private_pem,
@@ -166,7 +166,7 @@ async def test_decode_access_token_rejects_invalid_audience_without_refresh():
         {
             "sub": "user-1",
             "azp": "evil-client",
-            "iss": "https://auth.example/realms/revy",
+            "iss": "https://auth.example/realms/app",
         },
         private_pem,
         algorithm="RS256",
@@ -187,8 +187,8 @@ async def test_decode_access_token_unusable_jwks_returns_service_unavailable():
     token = jwt.encode(
         {
             "sub": "user-1",
-            "azp": "revy-web",
-            "iss": "https://auth.example/realms/revy",
+            "azp": "app-web",
+            "iss": "https://auth.example/realms/app",
         },
         private_pem,
         algorithm="RS256",

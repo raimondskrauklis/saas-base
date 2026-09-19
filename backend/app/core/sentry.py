@@ -3,8 +3,6 @@
 
 from __future__ import annotations
 
-import os
-
 import sentry_sdk
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.fastapi import FastApiIntegration
@@ -26,7 +24,7 @@ def init_sentry() -> None:
     if not should_capture_sentry():
         return
 
-    sentry_release = os.getenv("SENTRY_RELEASE") or settings.app_version
+    sentry_release = settings.sentry_release or settings.app_version
 
     sentry_sdk.init(
         dsn=settings.sentry_dsn,

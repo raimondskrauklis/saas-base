@@ -1,6 +1,7 @@
 # backend/alembic/env.py
-"""Alembic environment — async migrations against DATABASE_URL from app settings."""
-import os
+"""Alembic environment — URL is ENVIRONMENT (local: development; droplet: production).
+``-x test=true`` targets TEST_DATABASE_URL. Do not migrate production from a laptop.
+"""
 import re
 from datetime import UTC, datetime
 from logging.config import fileConfig
@@ -14,23 +15,13 @@ import app.core.alembic_postgresql
 import app.models  # noqa: F401 — register ORM tables on Base.metadata
 from alembic import context
 from app.core.alembic_postgresql import ALEMBIC_VERSION_NUM_LENGTH
-from app.core.config import settings
+from app.core.config import alembic_stage_from_x_arguments, database_url_for, settings
 from app.models.base import Base
 
 config = context.config
 
-# CI / local test DB: alembic -x test=true upgrade head
-test_mode = context.get_x_argument(as_dictionary=True).get("test", "").lower() == "true"
-if test_mode:
-    db_url = os.environ.get("TEST_DATABASE_URL") or (
-        str(settings.test_database_url) if settings.test_database_url else None
-    )
-    if not db_url:
-        raise ValueError("TEST_DATABASE_URL required for test mode (backend/.env)")
-else:
-    db_url = str(settings.database_url)
-
-config.set_main_option("sqlalchemy.url", db_url)
+stage = alembic_stage_from_x_arguments(context.get_x_argument(as_dictionary=True))
+config.set_main_option("sqlalchemy.url", database_url_for(settings, stage))
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

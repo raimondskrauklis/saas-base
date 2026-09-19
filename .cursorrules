@@ -1,21 +1,23 @@
-# Revy — Cursor rules (pointer)
+# saas-base — Cursor rules (pointer)
 
-Read **AGENTS.md** for the agent entry point, doc index, and Revy product context.
+Read **AGENTS.md** for the agent entry point and doc index.
+
+**Migrations: hand-written Alembic only. Never `alembic revision --autogenerate`.** Full `revision` / `down_revision` strings (`YYYY_MM_DD_HHMM_NNNN_slug`). Detail: `.cursor/rules/backend-python.mdc`.
 
 Detailed rules: **`.cursor/rules/`** (modular `.mdc` files):
 
 - `00-core.mdc` — behavioral rules, file headers
 - `backend-python.mdc` — FastAPI, SQLAlchemy, migrations (`backend/**`)
 - `frontend-react.mdc` — React, state, structure (`frontend/**`)
-- `app-color-tokens.mdc` — `--app-*` tokens + `tokens.revy.css` (`frontend/**`)
+- `app-color-tokens.mdc` — `--app-*` tokens in `tokens.css` (`frontend/**`)
 - `app-i18n.mdc` — EN + LV, `t()` everywhere (`frontend/**`)
 - `testing.mdc` — pytest + Vitest (`**/tests/**`, `**/*.test.*`)
 - `sentry-mcp.mdc` — Sentry MCP manual debugging only
 
-**Skills:** `.cursor/skills/ship-changes`, `sentry-fix-issues`, `phase-execution`, `chunk-execution` — see AGENTS.md.
+**Skills:** `.cursor/skills/ship-changes`, `babysit-revy-pr`, `sentry-fix-issues`, `phase-execution`, `chunk-execution` — see AGENTS.md.
 
 **Scaffold runbooks (committed):** `docs/starter-pack/` — bootstrap, Keycloak, registration flags.
 
-**Full template + product docs (contributors with access):** `internal-docs/starter-pack/`, `internal-docs/product/revy/`.
+**Full template + product docs (contributors with access):** `internal-docs/starter-pack/`.
 
 Do NOT create or update `.md` docs unless the user explicitly asks.

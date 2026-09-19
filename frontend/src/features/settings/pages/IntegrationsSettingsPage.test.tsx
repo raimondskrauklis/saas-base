@@ -9,10 +9,6 @@ vi.mock('@/contexts/AuthContext', () => ({
   useAuth: vi.fn(),
 }));
 
-vi.mock('@/features/installations/RevyGitHubIntegrationCard', () => ({
-  RevyGitHubIntegrationCard: () => <div>GitHub integration card</div>,
-}));
-
 import { useAuth } from '@/contexts/AuthContext';
 
 describe('IntegrationsSettingsPage', () => {
@@ -23,9 +19,9 @@ describe('IntegrationsSettingsPage', () => {
 
   it('renders registered integration cards', () => {
     registerExtension({
-      id: 'revy-github',
+      id: 'example-integration',
       slot: 'settings_integration',
-      component: () => <div>GitHub integration card</div>,
+      component: () => <div>Example integration card</div>,
       permission: 'items:view',
     });
     vi.mocked(useAuth).mockReturnValue({
@@ -43,7 +39,7 @@ describe('IntegrationsSettingsPage', () => {
 
     render(<IntegrationsSettingsPage />);
 
-    expect(screen.getByText('GitHub integration card')).toBeInTheDocument();
+    expect(screen.getByText('Example integration card')).toBeInTheDocument();
   });
 
   it('shows empty state when no extensions are registered', () => {

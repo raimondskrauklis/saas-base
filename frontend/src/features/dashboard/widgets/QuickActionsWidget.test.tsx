@@ -63,10 +63,6 @@ describe('QuickActionsWidget', () => {
       'href',
       '/settings/profile',
     );
-    expect(screen.getByRole('link', { name: /installations/i })).toHaveAttribute(
-      'href',
-      '/installations',
-    );
     expect(screen.getByRole('link', { name: /invite teammate/i })).toHaveAttribute(
       'href',
       '/settings/team',

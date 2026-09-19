@@ -155,7 +155,7 @@ async def delete_account(
     await _assert_not_sole_workspace_admin(session, user_id=user_id)
 
     user.status = UserStatus.deleted
-    user.email = f"deleted+{user.id}@revy.invalid"
+    user.email = f"deleted+{user.id}@app.invalid"
     user.full_name = None
     await session.execute(delete(WorkspaceMembershipORM).where(WorkspaceMembershipORM.user_id == user_id))
     await session.flush()

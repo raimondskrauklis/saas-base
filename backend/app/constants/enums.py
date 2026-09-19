@@ -53,13 +53,6 @@ class InvitationStatus(str, Enum):
     expired = "expired"
 
 
-class GitHubAccountType(str, Enum):
-    """github_installations.account_type — REVY_PRODUCT_SLICE.md."""
-
-    organization = "organization"
-    user = "user"
-
-
 class ExportJobStatus(str, Enum):
     """data_export_jobs.status — W6 account lifecycle."""
 
@@ -69,9 +62,3 @@ class ExportJobStatus(str, Enum):
     failed = "failed"
 
 
-class GitHubInstallationStatus(str, Enum):
-    """github_installations.status — REVY_PRODUCT_SLICE.md."""
-
-    active = "active"
-    suspended = "suspended"
-    removed = "removed"

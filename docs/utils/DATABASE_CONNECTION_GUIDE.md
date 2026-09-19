@@ -1,169 +1,235 @@
-# PostgreSQL connection guide (Revy)
+# PostgreSQL connection guide
 
-How to connect to the **DigitalOcean managed PostgreSQL 17** database used by Revy — for pgAdmin, one-off SQL, and understanding Alembic.
+How to connect to this template’s **DigitalOcean managed PostgreSQL 17** databases — for operators (migrations, grants) and for **retrieving / analysing data** (Cursor, pgAdmin, `psql`).
 
-**Canonical env:** `backend/.env.example` → copy to `backend/.env` (gitignored).
+**Canonical env:** `backend/.env.example` → `backend/.env` (gitignored).  
+**SQL:** `deploy/sql/postgres-extensions.sql` (app DBs) · `deploy/sql/postgres-readonly-role.sql` (analysis role)
 
-**Related:** `deploy/sql/postgres-extensions.sql`, `deploy/env-examples/README.md`, `docs/starter-pack/SCAFFOLD_P1_EXECUTION.md` (dev bootstrap).
+---
+
+## Two roles
+
+| Role (this template) | Privilege | Used by |
+|----------------------|-----------|---------|
+| `saas_base-user-admin` | read-write + DDL | FastAPI, Celery, Alembic |
+| `saas_base-user-readonly` | `SELECT` only | Cursor, pgAdmin analysis, ad hoc scripts |
+
+FastAPI and Alembic use the **admin** URL for `ENVIRONMENT`. Local Alembic is development (and `-x test=true`). Production Alembic runs on the droplet via GitHub Actions. Cursor uses `*_DATABASE_URL_READONLY`.
+
+**Build a read-only URL (separate env key — never overwrite the admin URL):** copy the admin URL into `*_DATABASE_URL_READONLY`. Change the user to `saas_base-user-readonly` and use that DigitalOcean user’s password. Keep host, port, database, `?ssl=require`. FastAPI and Alembic keep using `saas_base-user-admin`. Cursor always reads `database_url_readonly_for` / `*_READONLY`. DigitalOcean passwords are per user — swapping only the username on `DEV_DATABASE_URL` breaks the API.
+
+```text
+# admin (API / Alembic)
+postgresql+asyncpg://saas_base-user-admin:ADMIN_PASS@HOST:25060/saas_base_dev?ssl=require
+# analysis (Cursor) — same URL, different user (+ that user’s password)
+postgresql+asyncpg://saas_base-user-readonly:READONLY_PASS@HOST:25060/saas_base_dev?ssl=require
+```
 
 ---
 
 ## Environment variables
 
-| Variable | Purpose |
-|----------|---------|
-| `DATABASE_URL` | App + Alembic (dev) — `postgresql+asyncpg://…` |
-| `TEST_DATABASE_URL` | Pytest / future integration tests |
+`ENVIRONMENT` selects the **process bind** (admin). Analysis URLs are independent — set the stages you need to inspect.
 
-Revy does **not** use KP-style `PROD_DATABASE_URL` in the app env. Production URLs live in deploy secrets / droplet `.env` only.
-
-Example shape (from `backend/.env.example`):
+| Variable | Database | Who |
+|----------|----------|-----|
+| `DEV_DATABASE_URL` | `saas_base_dev` | API / Alembic when `ENVIRONMENT=development` |
+| `TEST_DATABASE_URL` | `saas_base_test` | pytest fixtures; `alembic -x test=true` |
+| `STAGING_DATABASE_URL` | `saas_base_staging` | Later: staging droplet (`ENVIRONMENT=staging`). Not the initial deploy. |
+| `PRODUCTION_DATABASE_URL` | `saas_base_prod` | Production droplet. Migrated by GitHub Actions (`alembic upgrade head`). |
+| `DEV_DATABASE_URL_READONLY` | `saas_base_dev` | Cursor / analysis |
+| `TEST_DATABASE_URL_READONLY` | `saas_base_test` | Cursor / analysis |
+| `STAGING_DATABASE_URL_READONLY` | `saas_base_staging` | Cursor / analysis |
+| `PRODUCTION_DATABASE_URL_READONLY` | `saas_base_prod` | Cursor / analysis |
 
 ```text
-DATABASE_URL=postgresql+asyncpg://revy-user-dev:****@….db.ondigitalocean.com:25060/revy-dev?ssl=require
-TEST_DATABASE_URL=postgresql+asyncpg://revy-user-test:****@….db.ondigitalocean.com:25060/revy-dev?ssl=require
+ENVIRONMENT=development
+DEV_DATABASE_URL=postgresql+asyncpg://saas_base-user-admin:****@….db.ondigitalocean.com:25060/saas_base_dev?ssl=require
+TEST_DATABASE_URL=postgresql+asyncpg://saas_base-user-admin:****@….db.ondigitalocean.com:25060/saas_base_test?ssl=require
+DEV_DATABASE_URL_READONLY=postgresql+asyncpg://saas_base-user-readonly:****@….db.ondigitalocean.com:25060/saas_base_dev?ssl=require
+PRODUCTION_DATABASE_URL_READONLY=postgresql+asyncpg://saas_base-user-readonly:****@….db.ondigitalocean.com:25060/saas_base_prod?ssl=require
 ```
 
-Use the **exact** database name and user from your DO cluster (e.g. `revy-dev`, `revy-user-dev`).
+Resolve a read-only URL in Python (does not print secrets):
+
+```python
+from app.core.config import settings, database_url_readonly_for
+
+url = database_url_readonly_for(settings, "production")  # or "development" / "test"
+```
+
+A leftover `DATABASE_URL` key is invalid — Settings forbids unknown keys.
 
 ---
 
 ## DigitalOcean: pooled vs direct
 
-DO exposes multiple connection modes:
-
 | Mode | Typical port | Use for |
 |------|--------------|---------|
-| **Connection pool** | `25060` | FastAPI runtime (`DATABASE_URL` in `.env`) |
-| **Direct / session** | From DO console (“Connection parameters”) | **Alembic migrations**, extensions, one-off DDL |
+| **Connection pool** | `25060` | FastAPI runtime; Cursor analysis is fine on pooled |
+| **Direct / session** | DO console “Connection parameters” | **Alembic**, extensions, grants, DDL |
 
-**Rule:** Run `pipenv run alembic upgrade head` with the **direct (non-pooled)** URL from the DO control panel. Pooled connections can make DDL look successful while nothing persists.
-
-App runtime may keep the pooled URL on port `25060`.
+Run local `pipenv run alembic upgrade head` with the **direct** admin URL for **dev**. Pooled DDL can look successful while nothing persists. Production DDL runs on the droplet (GitHub Actions), also with a direct URL in the droplet env file.
 
 ---
 
 ## Operator setup (once per database)
 
-Run as **`doadmin`** in pgAdmin (or `psql`), connected to the **target database** (e.g. `revy-dev`), not `defaultdb`.
+Run as **`doadmin`**, connected to the **target database** (not `defaultdb`). Repeat on each app DB. Keycloak has its own database and roles — not these.
 
-### 1. Extensions (doadmin)
+### 1. Extensions
 
 ```sql
-CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 ```
 
-(`pgcrypto` is also created in Alembic P0 if the app user can install it — pre-installing as `doadmin` is safer on DO.)
-
 See `deploy/sql/postgres-extensions.sql`.
 
-### 2. App user grants (doadmin, on `revy-dev`)
+### 2. App role (read-write)
 
-PostgreSQL 15+ / DO: `public` is owned by `pg_database_owner`. App users need explicit `CREATE`:
-
-```sql
-GRANT CONNECT ON DATABASE "revy-dev" TO "revy-user-dev";
-GRANT USAGE, CREATE ON SCHEMA public TO "revy-user-dev";
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "revy-user-dev";
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "revy-user-dev";
-GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO "revy-user-dev";
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO "revy-user-dev";
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO "revy-user-dev";
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO "revy-user-dev";
-```
-
-Repeat for `revy-user-test` (or your `TEST_DATABASE_URL` user) on the **same or separate** test database.
-
-**Verify** (run for each app user):
+PostgreSQL 15+ / DO: `public` is owned by `pg_database_owner`. The app role needs `CREATE`:
 
 ```sql
-SELECT has_schema_privilege('revy-user-dev', 'public', 'CREATE');
-SELECT has_schema_privilege('revy-user-test', 'public', 'CREATE');
+GRANT CONNECT ON DATABASE saas_base_dev TO "saas_base-user-admin";
+GRANT USAGE, CREATE ON SCHEMA public TO "saas_base-user-admin";
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "saas_base-user-admin";
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "saas_base-user-admin";
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO "saas_base-user-admin";
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO "saas_base-user-admin";
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO "saas_base-user-admin";
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO "saas_base-user-admin";
 ```
 
-`ALTER SCHEMA public OWNER TO …` often fails on DO — **not required** if `GRANT CREATE` is set.
+Repeat while connected to `saas_base_test`, `saas_base_staging`, and `saas_base_prod`. `GRANT CONNECT` can run from any database; schema grants must be on the target DB.
+
+### 3. Read-only role (Cursor / analysis)
+
+Create user `saas_base-user-readonly` in the DigitalOcean control panel (Users). Then run `deploy/sql/postgres-readonly-role.sql` as **doadmin** on **each** app database.
+
+Tables are created by `saas_base-user-admin` (Alembic), so default privileges are granted **for that role**:
+
+```sql
+GRANT CONNECT ON DATABASE saas_base_dev TO "saas_base-user-readonly";
+GRANT USAGE ON SCHEMA public TO "saas_base-user-readonly";
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO "saas_base-user-readonly";
+GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO "saas_base-user-readonly";
+ALTER DEFAULT PRIVILEGES FOR ROLE "saas_base-user-admin" IN SCHEMA public
+  GRANT SELECT ON TABLES TO "saas_base-user-readonly";
+ALTER DEFAULT PRIVILEGES FOR ROLE "saas_base-user-admin" IN SCHEMA public
+  GRANT SELECT ON SEQUENCES TO "saas_base-user-readonly";
+```
+
+**Verify** (connected as the read-only user, or as doadmin):
+
+```sql
+SELECT has_table_privilege('saas_base-user-readonly', 'users', 'SELECT');
+SELECT has_table_privilege('saas_base-user-readonly', 'users', 'INSERT');  -- must be false
+SELECT has_schema_privilege('saas_base-user-admin', 'public', 'CREATE');
+```
 
 ---
 
-## Migrations (Alembic)
+## Retrieve and analyse (Cursor)
 
-From `backend/`:
+1. Copy the admin URL into a **new** `*_DATABASE_URL_READONLY` key. Replace user `saas_base-user-admin` → `saas_base-user-readonly`. Same host, port, database, `?ssl=require`. Password = the DO password for the read-only user. Do **not** change `DEV_DATABASE_URL` / `TEST_DATABASE_URL` / droplet admin URLs.
+2. Connect with that URL. Database name in the URL is the database you query (`saas_base_prod`, not `defaultdb`).
+3. Run `SELECT` only. Do not migrate, insert, update, or delete — and do not use the admin user for analysis.
+4. Pick the stage explicitly: `database_url_readonly_for(settings, "production")` — do not reuse the API process bind.
 
-```bash
-# Use direct connection URL for this command (see above)
-pipenv run alembic upgrade head
-pipenv run alembic current
-```
-
-Hand-written revisions only — **no** `--autogenerate`. Revision ids use the long form `YYYY_MM_DD_HHMM_NNNN_slug` (see `backend/alembic.ini`).
-
-### `alembic_version.version_num` length
-
-Default Alembic uses `VARCHAR(32)`. Revy revision ids are longer (~50+ chars). The repo registers `RevyPostgresqlImpl` (`backend/app/core/alembic_postgresql.py`) so new installs use **`VARCHAR(128)`**, and `backend/alembic/env.py` widens an existing `VARCHAR(32)` column before migrating.
-
-**Applies to every database Alembic connects to** — dev (`DATABASE_URL`), test (`alembic -x test=true` → `TEST_DATABASE_URL`), staging, CI. No per-environment SQL needed; run upgrade once per database.
-
-If you hit `StringDataRightTruncationError` on `version_num`, pull latest `env.py` + `alembic_postgresql.py` and re-run upgrade on that database.
-
-### Test migrations
-
-```bash
-cd backend
-pipenv run alembic -x test=true upgrade head
-pipenv run alembic -x test=true current
-```
-
-Uses `TEST_DATABASE_URL` from `backend/.env`. The **test DB user** (e.g. `revy-user-test`) needs the same `GRANT USAGE, CREATE ON SCHEMA public` as the dev user — even when test and dev share one database name, users are separate roles.
-
-If `TEST_DATABASE_URL` points at a **different** database (e.g. `revy-test`), run extensions + grants on **that** database too.
-
----
-
-## App schema (after P0 + P1 migrations)
-
-| Table | Role |
-|-------|------|
-| `users` | Keycloak-linked accounts, `user_status` |
-| `workspaces` | Tenants |
-| `workspace_memberships` | User ↔ workspace + `user_role` |
-| `items` | Starter-pack demo CRUD |
-| `alembic_version` | Alembic head revision |
-
-Enums: `user_role`, `user_status`, `workspace_status`, `platform_role`.
-
----
-
-## pgAdmin / psql
-
-1. Host / port / database / user from `backend/.env` (`DATABASE_URL`).
-2. SSL: **require**.
-3. Connect to the **same database name** as in the URL (`revy-dev`, not a generic `revy` unless that is what DO created).
-
-Quick checks:
+Useful starting queries:
 
 ```sql
 SELECT current_user, current_database();
 SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY 1;
 SELECT version_num FROM alembic_version;
+
+SELECT id, email, status, created_at FROM users ORDER BY created_at DESC LIMIT 20;
+SELECT id, name, status FROM workspaces ORDER BY created_at DESC LIMIT 20;
+```
+
+## SSL (DigitalOcean)
+
+Managed Postgres **requires TLS**. The query parameter is **client-specific** — this is the usual connect error.
+
+| Client | Query string | Notes |
+|--------|----------------|-------|
+| FastAPI / Alembic (SQLAlchemy + asyncpg) | `?ssl=require` | Canonical app URL. Leave it on `*_DATABASE_URL`. |
+| `psql` / libpq | `?sslmode=require` | `ssl=require` is not a libpq key. Strip `postgresql+asyncpg://` → `postgresql://`. |
+| pgAdmin | SSL mode **Require** | Same host/port/db/user as the URL. |
+| raw `asyncpg.connect` | **no** `ssl=` in the URL | `ssl=require` is sent as a server GUC → `CantChangeRuntimeParamError`. Pass TLS as a connect argument. |
+
+Raw asyncpg (analysis scripts):
+
+```python
+import ssl
+import asyncpg
+from app.core.config import settings, database_url_readonly_for
+
+url = database_url_readonly_for(settings, "production").replace("postgresql+asyncpg://", "postgresql://")
+url = url.split("?", 1)[0]  # drop ?ssl=require
+conn = await asyncpg.connect(url, ssl=ssl.create_default_context())
+```
+
+If that raises `CERTIFICATE_VERIFY_FAILED` (macOS Python often does not trust the DO CA):
+
+```python
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+conn = await asyncpg.connect(url, ssl=ctx)
+```
+
+That still **encrypts**; it skips cert verification. Do not put `ssl=false` on a DO URL. Prefer the verified context when the CA is in the trust store.
+
+`psql`:
+
+```bash
+psql "${DEV_DATABASE_URL_READONLY/postgresql+asyncpg:/postgresql:}" \
+  -c "SELECT current_user, current_database();"
+# if needed, rewrite ssl=require → sslmode=require in that string
 ```
 
 ---
 
-## Direct `asyncpg` script (ad hoc)
+## Migrations (Alembic) — admin URLs only
 
-For one-off scripts outside FastAPI, strip the SQLAlchemy driver prefix:
+**Laptop** (prove the chain):
 
-```python
-# postgresql+asyncpg://… → postgresql://…
-url = os.environ["DATABASE_URL"].replace("postgresql+asyncpg://", "postgresql://")
-url = url.replace("?ssl=require", "")
-conn = await asyncpg.connect(url, ssl=ssl.create_default_context())
+```bash
+pipenv run alembic upgrade head
+pipenv run alembic current
+pipenv run alembic -x test=true upgrade head
 ```
 
-Prefer verified TLS (`ssl.create_default_context()`). Emergency only: `DATABASE_SSL_INSECURE=1` disables verification (same pattern as legacy KP scripts).
+**Production** — `.github/workflows/deploy.yml` SSHs to the droplet and runs `alembic upgrade head` with that host’s env file (`ENVIRONMENT=production` → `PRODUCTION_DATABASE_URL`). Do not migrate production from a laptop.
+
+**Staging droplet** — not initial. One droplet = production until you add a second host; then the same GitHub Actions pattern with `ENVIRONMENT=staging`.
+
+Hand-written revisions only — **no** `--autogenerate`. Revision ids: `YYYY_MM_DD_HHMM_NNNN_slug`.
+
+Default Alembic uses `VARCHAR(32)`. This repo’s ids are longer. `RevyPostgresqlImpl` (`backend/app/core/alembic_postgresql.py`) uses **`VARCHAR(128)`**; `alembic/env.py` widens an existing `VARCHAR(32)` column before migrating.
+
+---
+
+## App schema (analysis)
+
+| Table | Contents |
+|-------|----------|
+| `users` | Keycloak-linked accounts, `user_status` |
+| `workspaces` | Tenants |
+| `workspace_memberships` | User ↔ workspace + `user_role` |
+| `workspace_invitations` | Invites |
+| `items` | Starter-pack demo CRUD |
+| `api_audit` | Request audit |
+| `stripe_webhook_events` | Stripe idempotency |
+| `data_export_jobs` | Account export jobs |
+| `impersonation_sessions` | Support impersonation |
+| `keycloak_webhook_deliveries` | Keycloak webhook idempotency |
+| `alembic_version` | Migration head |
+
+Enums: `user_role`, `user_status`, `workspace_status`, `platform_role`.
 
 ---
 
@@ -171,18 +237,13 @@ Prefer verified TLS (`ssl.create_default_context()`). Emergency only: `DATABASE_
 
 | Issue | What to check |
 |-------|----------------|
-| `permission denied for schema public` | `GRANT CREATE ON SCHEMA public` on **this** database; user name matches `.env` |
-| `has_schema_privilege` true in pgAdmin but false from app | Grants on wrong DB (`revy` vs `revy-dev`) or wrong user |
-| `StringDataRightTruncationError` on `version_num` | Revy Alembic impl + widen helper (see above) |
-| Migrations log success but no tables | Used **pooled** URL for Alembic — switch to **direct** URL |
+| `permission denied for schema public` | App role: `GRANT CREATE` on **this** database |
+| `permission denied for table` as readonly | Grants from `postgres-readonly-role.sql` on **this** database; default privileges **for** `saas_base-user-admin` |
+| `has_schema_privilege` true in pgAdmin but false from app | Wrong database (`defaultdb` vs `saas_base_dev`) or wrong role |
+| `StringDataRightTruncationError` on `version_num` | Alembic impl + widen helper (see above) |
+| Migrations log success but no tables | Pooled URL used for Alembic — switch to **direct** |
 | `CREATE EXTENSION` fails for app user | Run extensions as **doadmin** first |
-| `CantChangeRuntimeParamError` (asyncpg) | Remove `?ssl=require` from URL; pass `ssl=` context |
+| `CantChangeRuntimeParamError` (`ssl`) | Raw asyncpg: drop `?ssl=require` from the URL; pass `ssl=` (see SSL section) |
+| `CERTIFICATE_VERIFY_FAILED` | Verified context vs DO CA — unverified `SSLContext` encrypts but skips verify (see SSL section) |
+| `sslmode` errors in `psql` | Use `sslmode=require`, not `ssl=require` |
 | Connection refused | DO trusted sources / firewall; VPN |
-
----
-
-## What this guide is not
-
-- Not KP analytics (`raw_eis_*`, `PROD_DATABASE_URL`, `scripts/utils/db_utils.py` — those do not exist in Revy).
-- Not production droplet ops (see `deploy/env-examples/`).
-- Not a substitute for `docs/starter-pack/` execution runbooks.

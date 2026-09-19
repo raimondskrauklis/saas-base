@@ -3,7 +3,7 @@
 Copy this **entire `config/` folder** to the droplet:
 
 ```text
-/mnt/revy_volume/keycloak/config/
+/mnt/app_volume/keycloak/config/
   .env
   .env.example
   docker-compose.yml
@@ -17,16 +17,16 @@ All commands run **from that directory** — no `-f` paths, no absolute `env_fil
 ## First deploy
 
 ```bash
-cd /mnt/revy_volume/keycloak/config
+cd /mnt/app_volume/keycloak/config
 cp .env.example .env
 chmod 600 .env
 # edit .env — passwords, DB URL
 
-docker network create revy-net 2>/dev/null || true
+docker network create app-net 2>/dev/null || true
 docker compose build
 docker compose up -d
 curl -sf http://127.0.0.1:9000/health/ready
-curl -s https://auth.revy.createit.digital/realms/revy/.well-known/openid-configuration | head
+curl -s https://auth.app.example.com/realms/app/.well-known/openid-configuration | head
 ```
 
 ## Production vs simple
@@ -49,7 +49,7 @@ After changing Dockerfile: `docker compose build --no-cache && docker compose up
 ## Restart / upgrade
 
 ```bash
-cd /mnt/revy_volume/keycloak/config
+cd /mnt/app_volume/keycloak/config
 docker compose down
 docker compose build --no-cache   # after Dockerfile or KC version bump
 docker compose up -d --force-recreate
@@ -60,5 +60,26 @@ docker compose up -d --force-recreate
 | | |
 |-|-|
 | Health | `curl -sf http://127.0.0.1:9000/health/ready` |
-| Nginx | `deploy/nginx/auth.revy.createit.digital.conf` |
-| API env | `KEYCLOAK_URL=http://keycloak:8080` and `KEYCLOAK_ISSUER=https://auth.revy.createit.digital/realms/revy` in `/mnt/revy_volume/backend/.env` |
+| Nginx | `deploy/nginx/auth.app.example.com.conf` |
+| API env | `KEYCLOAK_URL=http://keycloak:8080` and `KEYCLOAK_ISSUER=https://auth.app.example.com/realms/app` in `/mnt/app_volume/backend/.env` |
+
+## Identity webhook (vymalo 0.10.0-rc.1)
+
+Keycloak can send identity events to the API over an **internal** docker network (no public nginx route). Optional for local Mode A (JIT). Required only when this listener is deployed.
+
+1. Set `KEYCLOAK_WEBHOOK_SECRET` in backend `.env` (same value as `WEBHOOK_HTTP_AUTH_PASSWORD` in KC `.env`).
+2. Production: `TRUSTED_HOSTS` must include the compose service hostname Keycloak uses (`backend` if `WEBHOOK_HTTP_BASE_PATH=http://backend:8000/...`).
+3. Rebuild KC after Dockerfile changes: `docker compose build --no-cache && docker compose up -d`.
+4. Register a test user in KC.
+5. Verify delivery + user row:
+
+```bash
+# API logs
+docker logs app-api 2>&1 | grep keycloak_webhook
+
+# PostgreSQL (replace connection as needed)
+psql "$DEV_DATABASE_URL" -c "SELECT delivery_id, event_type, received_at FROM keycloak_webhook_deliveries ORDER BY received_at DESC LIMIT 5;"
+psql "$DEV_DATABASE_URL" -c "SELECT email, keycloak_user_id, status FROM users ORDER BY created_at DESC LIMIT 5;"
+```
+
+Full smoke: `docs/starter-pack/KEYCLOAK_DEV_CHECKLIST.md`. Each clone uses its own Keycloak database; local Mode A does not require this listener.

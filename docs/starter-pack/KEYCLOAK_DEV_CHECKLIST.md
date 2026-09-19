@@ -1,9 +1,12 @@
-# Keycloak dev checklist (Revy)
+# Keycloak checklist
 
 Configure realm and clients so browser tokens pass `app.core.auth` validation.
 
 **Env canon:** `backend/.env.example`, `frontend/.env.example`  
-**Audience logic:** `backend/app/core/auth.py` — allowlist `revy-api` + `revy-web`
+**Audience logic:** `backend/app/core/auth.py` — allowlist `app-api` + `app-web`  
+**Replace list / new clone:** [APP_REPLACE.md](../platform-base/APP_REPLACE.md)
+
+Each clone has its **own** Keycloak (own Keycloak database). Do not share a realm with another product.
 
 ---
 
@@ -11,30 +14,30 @@ Configure realm and clients so browser tokens pass `app.core.auth` validation.
 
 | Setting | Value |
 |---------|--------|
-| Realm name | `revy` |
+| Realm name | `app` |
 | Login with email | On |
 | Email as username | Recommended |
 | Verify email | On (dev users: complete verification or relax required action) |
 
-Backend: `KEYCLOAK_REALM=revy`  
-Production API (docker): `KEYCLOAK_URL=http://keycloak:8080` **and** `KEYCLOAK_ISSUER=https://auth.revy.createit.digital/realms/revy` (JWT `iss` from browser login uses the public host).  
-Frontend: `VITE_KEYCLOAK_REALM=revy`
+Backend: `KEYCLOAK_REALM=app`  
+Production API (docker): `KEYCLOAK_URL=http://keycloak:8080` **and** `KEYCLOAK_ISSUER=https://auth.app.example.com/realms/app` (JWT `iss` from browser login uses the public host).  
+Frontend: `VITE_KEYCLOAK_REALM=app`
 
 ---
 
-## Client: `revy-api` (confidential)
+## Client: `app-api` (confidential)
 
 | Setting | Value |
 |---------|--------|
-| Client ID | `revy-api` |
+| Client ID | `app-api` |
 | Client authentication | On |
 | Standard flow | Off (API client — tokens via service/user flows as needed) |
-| Direct access grants | Off (prefer browser via `revy-web`) |
+| Direct access grants | Off (prefer browser via `app-web`) |
 
 **Backend env:**
 
 ```text
-KEYCLOAK_CLIENT_ID=revy-api
+KEYCLOAK_CLIENT_ID=app-api
 KEYCLOAK_CLIENT_SECRET=<from Keycloak credentials tab>
 ```
 
@@ -42,71 +45,73 @@ Service account / mapper: ensure access tokens intended for the API include audi
 
 ---
 
-## Client: `revy-web` (public SPA)
+## Client: `app-web` (public SPA)
 
 | Setting | Value |
 |---------|--------|
-| Client ID | `revy-web` |
+| Client ID | `app-web` |
 | Client authentication | Off (public) |
 | Standard flow | On |
-| Valid redirect URIs | `http://localhost:5173/*`, `http://127.0.0.1:5173/*`, `https://revy.createit.digital/*` |
-| Web origins | `http://localhost:5173`, `http://127.0.0.1:5173`, `https://revy.createit.digital` |
+| Valid redirect URIs | `http://localhost:5173/*`, `http://127.0.0.1:5173/*`, `https://app.example.com/*` |
+| Web origins | `http://localhost:5173`, `http://127.0.0.1:5173`, `https://app.example.com` |
 
 **Frontend env:**
 
 ```text
-VITE_KEYCLOAK_CLIENT_ID=revy-web
+VITE_KEYCLOAK_CLIENT_ID=app-web
 VITE_KEYCLOAK_URL=http://localhost:8080
 VITE_API_BASE_URL=http://localhost:8000/api/v1
 ```
 
-**Production (`createit.digital`):**
+**Production (placeholders — replace hosts):**
 
 ```text
-VITE_KEYCLOAK_URL=https://auth.revy.createit.digital
-VITE_API_BASE_URL=https://revy.createit.digital/api/v1
+VITE_KEYCLOAK_URL=https://auth.app.example.com
+VITE_API_BASE_URL=https://app.example.com/api/v1
 ```
 
-Keycloak is on a **dedicated subdomain** (`auth.revy.createit.digital`), not a path on the app host (`/auth`). Nginx configs: `internal-docs/starter-pack/deploy/nginx/` (see `auth.revy.createit.digital.conf`). TLS: DNS-01 — `docs/utils/CERTBOT_DIGITALOCEAN_DNS_RENEWAL.md`.
-
-Adjust URLs if Keycloak runs behind a different host or path prefix (local dev only).
+Keycloak is on a **dedicated subdomain** (`auth.app.example.com`), not a path on the app host (`/auth`). Nginx: `deploy/nginx/auth.app.example.com.conf`. TLS: DNS-01 — `docs/utils/CERTBOT_DIGITALOCEAN_DNS_RENEWAL.md`.
 
 ---
 
 ## JWT audience / azp (critical)
 
-The API allowlist is `revy-api` + `revy-web` (`auth.py`).
+The API allowlist is `app-api` + `app-web` (`auth.py`).
 
-**Required:** `azp` must be `revy-web` (browser) or `revy-api`.
+**Required:** `azp` must be `app-web` (browser) or `app-api`.
 
 **`aud` handling:**
 
 - If `aud` is **omitted**, validation passes when `azp` is allowed.
-- If `aud` is a **string**, it must be `revy-api` or `revy-web` — `aud: account` alone returns `Invalid token audience`.
+- If `aud` is a **string**, it must be `app-api` or `app-web` — `aud: account` alone returns `Invalid token audience`.
 - If `aud` is a **list**, at least one entry must be in the allowlist.
 
-Browser tokens often include `aud: account`. Configure Keycloak so the access token either omits `aud`, includes `revy-api` / `revy-web` in `aud`, or use a mapper that adds the API client to audience — see `internal-docs/starter-pack/deploy/docs/keycloak.md`.
+Browser tokens often include `aud: account`. Configure Keycloak so the access token either omits `aud`, includes `app-api` / `app-web` in `aud`, or use a mapper that adds the API client to audience.
 
 **Verify after login** (decode access token at [jwt.io](https://jwt.io) or API logs):
 
-- `iss` ends with `/realms/revy`
-- `azp` is `revy-web`
+- `iss` ends with `/realms/app`
+- `azp` is `app-web`
 - `email` / `sub` present
 
 Failure symptom: `401` / `Invalid token audience` on `/api/v1/me`.
-
-**Fix:** Keycloak client scopes / audience mappers — align with `internal-docs/starter-pack/deploy/docs/keycloak.md`.
 
 ---
 
 ## Optional: bootstrap super admin
 
-If using `BOOTSTRAP_SUPER_ADMIN_EMAIL`, register that exact email in Keycloak before first API login. See [DEV_BOOTSTRAP.md](./DEV_BOOTSTRAP.md) §5.
+If using `BOOTSTRAP_SUPER_ADMIN_EMAIL`, register that exact email in Keycloak before first API login. See [DEV_BOOTSTRAP.md](./DEV_BOOTSTRAP.md).
 
 ---
 
-## Smoke (ties to DEV_BOOTSTRAP)
+## Optional: identity webhook (vymalo)
+
+Local Mode A works with **JIT** (first `/me`). The Keycloak HTTP listener is optional until you deploy Keycloak that can POST to the API. See `deploy/keycloak/config/README.md`. Production: include `backend` in `TRUSTED_HOSTS`.
+
+---
+
+## Smoke
 
 1. Login at `http://localhost:5173`
-2. Authenticated `GET /api/v1/me` → `status: active` (Mode A)
+2. Authenticated `GET /api/v1/me` → `status: active` (Mode A) and a `users` row
 3. No repeated 401 on API calls
