@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from sqlalchemy.exc import IntegrityError
 
 from app.constants.enums import PlatformRole, UserStatus
 from app.core.exceptions import ConflictError, UnauthorizedError
@@ -16,9 +17,26 @@ from app.services.keycloak_provisioning import (
 from app.services.users import BOOTSTRAP_KEYCLOAK_PLACEHOLDER
 
 
+class _PgUniqueViolation:
+    pgcode = "23505"
+
+
+class _Nested:
+    def __init__(self, session: AsyncMock) -> None:
+        self._session = session
+
+    async def __aenter__(self) -> AsyncMock:
+        return self._session
+
+    async def __aexit__(self, *args: object) -> None:
+        return None
+
+
 def _session_with_flush() -> AsyncMock:
     session = AsyncMock()
     session.flush = AsyncMock()
+    session.begin_nested = lambda: _Nested(session)
+    session.expunge = lambda _obj: None
 
     async def _refresh(obj: UserORM) -> None:
         if getattr(obj, "id", None) is None:
@@ -130,6 +148,92 @@ async def test_provision_email_conflict_on_create():
             "app.services.keycloak_provisioning._find_bootstrap_seed",
             new_callable=AsyncMock,
             return_value=None,
+        ),
+        patch(
+            "app.services.keycloak_provisioning.get_user_by_email",
+            new_callable=AsyncMock,
+            return_value=other,
+        ),
+    ):
+        with pytest.raises(ConflictError) as exc_info:
+            await provision_user_from_keycloak(
+                session,
+                sub="kc-new",
+                email="taken@example.com",
+                email_verified=True,
+            )
+    assert exc_info.value.error_code == "identity_email_conflict"
+
+
+@pytest.mark.asyncio
+async def test_provision_create_unique_violation_returns_existing_sub():
+    session = _session_with_flush()
+    session.flush = AsyncMock(side_effect=IntegrityError("INSERT", {}, _PgUniqueViolation()))
+    winner = UserORM(
+        keycloak_user_id="kc-new",
+        email="user@example.com",
+        status=UserStatus.pending_profile,
+    )
+    winner.id = uuid.uuid4()
+    with (
+        patch(
+            "app.services.keycloak_provisioning.get_user_by_keycloak_id",
+            new_callable=AsyncMock,
+            side_effect=[None, winner],
+        ),
+        patch(
+            "app.services.keycloak_provisioning._find_bootstrap_seed",
+            new_callable=AsyncMock,
+            return_value=None,
+        ),
+        patch(
+            "app.services.keycloak_provisioning._assert_email_available",
+            new_callable=AsyncMock,
+        ),
+        patch(
+            "app.services.keycloak_provisioning.maybe_auto_provision_user",
+            new_callable=AsyncMock,
+            return_value=winner,
+        ),
+        patch(
+            "app.services.keycloak_provisioning.activate_bootstrap_super_admin",
+            new_callable=AsyncMock,
+            return_value=winner,
+        ),
+    ):
+        user = await provision_user_from_keycloak(
+            session,
+            sub="kc-new",
+            email="user@example.com",
+            email_verified=True,
+        )
+    assert user is winner
+
+
+@pytest.mark.asyncio
+async def test_provision_create_unique_violation_email_conflict():
+    session = _session_with_flush()
+    session.flush = AsyncMock(side_effect=IntegrityError("INSERT", {}, _PgUniqueViolation()))
+    other = UserORM(
+        keycloak_user_id="kc-other",
+        email="taken@example.com",
+        status=UserStatus.active,
+    )
+    other.id = uuid.uuid4()
+    with (
+        patch(
+            "app.services.keycloak_provisioning.get_user_by_keycloak_id",
+            new_callable=AsyncMock,
+            return_value=None,
+        ),
+        patch(
+            "app.services.keycloak_provisioning._find_bootstrap_seed",
+            new_callable=AsyncMock,
+            return_value=None,
+        ),
+        patch(
+            "app.services.keycloak_provisioning._assert_email_available",
+            new_callable=AsyncMock,
         ),
         patch(
             "app.services.keycloak_provisioning.get_user_by_email",

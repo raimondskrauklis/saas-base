@@ -9,6 +9,7 @@ from __future__ import annotations
 from uuid import UUID
 
 from sqlalchemy import delete
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.constants.enums import PlatformRole, UserStatus
@@ -28,6 +29,13 @@ from app.services.users import (
 )
 
 logger = get_logger(__name__)
+
+_UNIQUE_VIOLATION_PG_CODE = "23505"
+
+
+def _is_unique_violation(exc: IntegrityError) -> bool:
+    orig = exc.orig
+    return orig is not None and getattr(orig, "pgcode", None) == _UNIQUE_VIOLATION_PG_CODE
 
 
 def normalize_email(email: str) -> str:
@@ -135,11 +143,27 @@ async def provision_user_from_keycloak(
         status=resolve_initial_user_status(email_verified=email_verified),
     )
     session.add(user)
-    await session.flush()
-    logger.info(
-        "user_provisioned",
-        extra={"user_id": str(user.id), "operation": "provision_user_from_keycloak"},
-    )
+    try:
+        async with session.begin_nested():
+            await session.flush()
+    except IntegrityError as exc:
+        if not _is_unique_violation(exc):
+            raise
+        session.expunge(user)
+        existing = await get_user_by_keycloak_id(session, sub)
+        if existing is None:
+            existing = await get_user_by_email(session, normalized)
+            if existing is None or existing.keycloak_user_id != sub:
+                raise ConflictError(
+                    message="Email is already associated with another account",
+                    error_code="identity_email_conflict",
+                ) from exc
+        user = existing
+    else:
+        logger.info(
+            "user_provisioned",
+            extra={"user_id": str(user.id), "operation": "provision_user_from_keycloak"},
+        )
 
     user = await maybe_auto_provision_user(
         session,
