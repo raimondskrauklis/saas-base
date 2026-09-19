@@ -20,12 +20,12 @@ def test_verify_keycloak_webhook_secret_rejects_missing_header():
 def test_verify_keycloak_webhook_basic_auth_accepts_matching_password():
     from app.integrations.keycloak_webhook import verify_keycloak_webhook_basic_auth
 
-    token = base64.b64encode(b"revy:super-secret").decode()
+    token = base64.b64encode(b"app:super-secret").decode()
     assert verify_keycloak_webhook_basic_auth(f"Basic {token}", "super-secret") is True
 
 
 def test_verify_keycloak_webhook_basic_auth_rejects_wrong_password():
     from app.integrations.keycloak_webhook import verify_keycloak_webhook_basic_auth
 
-    token = base64.b64encode(b"revy:wrong").decode()
+    token = base64.b64encode(b"app:wrong").decode()
     assert verify_keycloak_webhook_basic_auth(f"Basic {token}", "super-secret") is False

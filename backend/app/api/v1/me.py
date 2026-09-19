@@ -196,5 +196,5 @@ async def download_export_job(
     return FileResponse(
         path=path,
         media_type="application/zip",
-        filename=f"revy-export-{job_id}.zip",
+        filename=f"app-export-{job_id}.zip",
     )

@@ -149,7 +149,7 @@
       },
       "deleteAccount": {
         "title": "Delete account",
-        "body": "Deactivate your Revy account. Your Keycloak login is not removed — contact support if you need full identity deletion.",
+        "body": "Deactivate your account. Your Keycloak login is not removed — contact support if you need full identity deletion.",
         "action": "Delete account",
         "confirmTitle": "Delete your account?",
         "confirmBody": "This cannot be undone. You will be signed out immediately.",

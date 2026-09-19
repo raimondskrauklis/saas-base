@@ -48,10 +48,10 @@ class Settings(BaseSettings):
     debug: bool = False
     log_level: str = "INFO"
     log_format: str = "json"
-    app_name: str = "Revy"
+    app_name: str = "App"
     app_version: str = "1.0.0"
     app_public_url: str | None = None
-    keycloak_frontend_client_id: str = "revy-web"
+    keycloak_frontend_client_id: str = "app-web"
 
     # Pagination
     default_page_limit: int = 50
@@ -82,7 +82,7 @@ class Settings(BaseSettings):
     stripe_checkout_cancel_url: str | None = None
 
     # Data export — ACCOUNT_LIFECYCLE.md
-    export_storage_path: str = "/tmp/revy/exports"
+    export_storage_path: str = "/tmp/app/exports"
     export_ttl_days: int = 7
 
     @property

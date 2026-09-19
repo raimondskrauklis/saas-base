@@ -173,7 +173,7 @@ async def apply_keycloak_user_deleted(session: AsyncSession, *, sub: str) -> Use
     if user is None:
         return None
     user.status = UserStatus.deleted
-    user.email = f"deleted+{user.id}@revy.invalid"
+    user.email = f"deleted+{user.id}@app.invalid"
     user.full_name = None
     await session.execute(delete(WorkspaceMembershipORM).where(WorkspaceMembershipORM.user_id == user.id))
     await session.flush()

@@ -3,7 +3,7 @@
 
 Listener: https://github.com/vymalo/keycloak-webhook (HTTP provider, KC 26).
 Auth (vymalo): HTTP Basic via ``WEBHOOK_HTTP_AUTH_USERNAME`` / ``WEBHOOK_HTTP_AUTH_PASSWORD``.
-Auth (Revy API): ``X-Webhook-Secret`` header **or** Basic password matching ``KEYCLOAK_WEBHOOK_SECRET``.
+Auth (API): ``X-Webhook-Secret`` header **or** Basic password matching ``KEYCLOAK_WEBHOOK_SECRET``.
 
 Sample user event payload (shape may vary by listener version):
 

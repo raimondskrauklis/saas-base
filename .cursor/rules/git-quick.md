@@ -124,11 +124,11 @@ Do NOT retry. Do NOT workaround. Tell user what to run.
 
 ---
 
-## Context: Revy
+## Context: saas-base
 
 - **Backend:** FastAPI, SQLAlchemy async, Alembic, Pydantic — `backend/app/`
 - **Frontend:** React 19, TypeScript, Vite — `frontend/src/`
-- **Product slice:** `docs/starter-pack/REVY_PRODUCT_SLICE.md`
+- **Replace list:** `docs/platform-base/APP_REPLACE.md`
 
 Use for accurate, specific commit messages.
 

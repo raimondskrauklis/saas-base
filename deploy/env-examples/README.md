@@ -6,22 +6,22 @@ Canonical env examples for local development and production. Copy from here — 
 
 | Group | Local dev | Production droplet | GitHub Actions |
 |-------|-----------|-------------------|----------------|
-| Backend | `backend/.env` | `/mnt/revy/backend/.env` | `CI_*` test secrets |
+| Backend | `backend/.env` | `/mnt/app/backend/.env` | `CI_*` test secrets |
 | Frontend `VITE_*` | `frontend/.env.local` | Baked at CI build — **not** on droplet | Repository secrets |
-| Keycloak | — | `/mnt/revy_volume/keycloak/config/` | `deploy/keycloak/config/` |
+| Keycloak | — | `/mnt/app_volume/keycloak/config/` | `deploy/keycloak/config/` |
 | Deploy | — | — | `DOCR_TOKEN`, `DROPLET_IP`, `SSH_PRIVATE_KEY` |
 | Nginx vhosts | — | `/etc/nginx/sites-available/` | `deploy/nginx/*.conf` |
 
-Production frontend is static `serve -s dist` — changing `VITE_*` requires **rebuild + redeploy** of `revy-web`.
+Production frontend is static `serve -s dist` — changing `VITE_*` requires **rebuild + redeploy** of `app-web`.
 
-**Production URLs (`createit.digital`):** SPA/API `https://revy.createit.digital`, Keycloak `https://auth.revy.createit.digital` (not `/auth` on the app host).
+**Production URLs (placeholders):** SPA/API `https://app.example.com`, Keycloak `https://auth.app.example.com` (not `/auth` on the app host).
 
 ## Files
 
 | File | Copy to |
 |------|---------|
 | `backend/.env.example` | `backend/.env` (local dev — canonical) |
-| `backend.env.production.example` | droplet `/mnt/revy/backend/.env` (deploy phase) |
+| `backend.env.production.example` | droplet `/mnt/app/backend/.env` (deploy phase) |
 | `frontend.env.local.example` | `frontend/.env.local` |
 | `frontend.env.production.example` | GitHub Actions secrets (build-time `VITE_*`) |
 | `github-actions.secrets.example` | GitHub → Settings → Secrets checklist |

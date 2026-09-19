@@ -41,7 +41,7 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title="Revy API",
+        title=settings.app_name,
         version=settings.app_version,
         lifespan=lifespan,
         docs_url="/docs" if settings.debug else None,

@@ -8,7 +8,7 @@ vi.mock('@/features/admin/api', () => ({
 }));
 
 vi.mock('@/lib/keycloak', () => ({
-  getKeycloakAdminConsoleUrl: vi.fn(() => 'https://auth.example.com/admin/revy/console/'),
+  getKeycloakAdminConsoleUrl: vi.fn(() => 'https://auth.example.com/admin/app/console/'),
 }));
 
 import { fetchAdminSettings } from '@/features/admin/api';
@@ -43,7 +43,7 @@ describe('AdminSettingsPage', () => {
 
     await waitFor(() => {
       const link = screen.getByRole('link', { name: /keycloak admin console/i });
-      expect(link).toHaveAttribute('href', 'https://auth.example.com/admin/revy/console/');
+      expect(link).toHaveAttribute('href', 'https://auth.example.com/admin/app/console/');
     });
   });
 });

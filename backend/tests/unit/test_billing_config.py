@@ -8,13 +8,13 @@ from app.core.config import Settings
 def _base_settings_kwargs() -> dict:
     return {
         "environment": "development",
-        "database_url": "postgresql+asyncpg://localhost/revy",
+        "database_url": "postgresql+asyncpg://localhost/app",
         "redis_url": "redis://localhost:6379/0",
         "secret_key": "test",
         "allowed_origins": "http://localhost:5173",
         "keycloak_url": "http://localhost:8080",
-        "keycloak_realm": "revy",
-        "keycloak_client_id": "revy-api",
+        "keycloak_realm": "app",
+        "keycloak_client_id": "app-api",
         "keycloak_client_secret": "secret",
     }
 

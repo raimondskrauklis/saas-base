@@ -6,9 +6,10 @@ History through tag `saas-base-v1.1`. First consumer after `saas-base-v2`: `../i
 
 ## Quick start
 
-1. [Dev bootstrap](docs/starter-pack/DEV_BOOTSTRAP.md) — env, DB, Keycloak, local API + frontend
-2. [Keycloak checklist](docs/starter-pack/KEYCLOAK_DEV_CHECKLIST.md)
-3. [Agent guide](AGENTS.md)
+1. [Start recipe](docs/platform-base/APP_REPLACE.md) — own DBs, own Keycloak, placeholders
+2. [Dev bootstrap](docs/starter-pack/DEV_BOOTSTRAP.md)
+3. [Keycloak checklist](docs/starter-pack/KEYCLOAK_DEV_CHECKLIST.md)
+4. [Agent guide](AGENTS.md)
 
 ## Repo layout
 

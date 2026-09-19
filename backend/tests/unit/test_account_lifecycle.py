@@ -217,7 +217,7 @@ async def test_delete_account_anonymizes_and_audits():
         await delete_account(session, user_id=user_id, confirm_email="user@example.com")
 
     assert user.status == UserStatus.deleted
-    assert user.email == f"deleted+{user_id}@revy.invalid"
+    assert user.email == f"deleted+{user_id}@app.invalid"
     assert user.full_name is None
     record.assert_awaited_once()
     assert record.await_args.kwargs["action"] == "user.deleted"

@@ -9,7 +9,7 @@ Detailed rules: **`.cursor/rules/`** (modular `.mdc` files):
 - `00-core.mdc` — behavioral rules, file headers
 - `backend-python.mdc` — FastAPI, SQLAlchemy, migrations (`backend/**`)
 - `frontend-react.mdc` — React, state, structure (`frontend/**`)
-- `app-color-tokens.mdc` — `--app-*` tokens + `tokens.revy.css` (`frontend/**`)
+- `app-color-tokens.mdc` — `--app-*` tokens in `tokens.css` (`frontend/**`)
 - `app-i18n.mdc` — EN + LV, `t()` everywhere (`frontend/**`)
 - `testing.mdc` — pytest + Vitest (`**/tests/**`, `**/*.test.*`)
 - `sentry-mcp.mdc` — Sentry MCP manual debugging only
@@ -18,6 +18,6 @@ Detailed rules: **`.cursor/rules/`** (modular `.mdc` files):
 
 **Scaffold runbooks (committed):** `docs/starter-pack/` — bootstrap, Keycloak, registration flags.
 
-**Full template + product docs (contributors with access):** `internal-docs/starter-pack/`, `internal-docs/product/revy/`.
+**Full template + product docs (contributors with access):** `internal-docs/starter-pack/`.
 
 Do NOT create or update `.md` docs unless the user explicitly asks.

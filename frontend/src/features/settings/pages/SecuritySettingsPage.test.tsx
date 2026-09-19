@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { SecuritySettingsPage } from '@/features/settings/pages/SecuritySettingsPage';
 
 vi.mock('@/lib/keycloak', () => ({
-  getKeycloakAccountUrl: vi.fn(() => 'https://auth.example.com/realms/revy/account'),
+  getKeycloakAccountUrl: vi.fn(() => 'https://auth.example.com/realms/app/account'),
 }));
 
 describe('SecuritySettingsPage', () => {
@@ -12,7 +12,7 @@ describe('SecuritySettingsPage', () => {
     render(<SecuritySettingsPage />);
 
     const link = screen.getByRole('link', { name: /open account console/i });
-    expect(link).toHaveAttribute('href', 'https://auth.example.com/realms/revy/account');
+    expect(link).toHaveAttribute('href', 'https://auth.example.com/realms/app/account');
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');
   });

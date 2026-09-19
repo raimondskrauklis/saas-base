@@ -314,7 +314,7 @@ async def test_apply_keycloak_user_deleted_anonymizes_and_drops_memberships():
 
     assert result is user
     assert user.status == UserStatus.deleted
-    assert user.email == f"deleted+{user.id}@revy.invalid"
+    assert user.email == f"deleted+{user.id}@app.invalid"
     assert user.full_name is None
     assert user.keycloak_user_id == "kc-1"
     session.execute.assert_awaited()
@@ -325,7 +325,7 @@ async def test_provision_does_not_revive_deleted_user():
     session = _session_with_flush()
     deleted = UserORM(
         keycloak_user_id="kc-1",
-        email="deleted+old@revy.invalid",
+        email="deleted+old@app.invalid",
         full_name=None,
         status=UserStatus.deleted,
     )
@@ -344,5 +344,5 @@ async def test_provision_does_not_revive_deleted_user():
         )
     assert user is deleted
     assert user.status == UserStatus.deleted
-    assert user.email == "deleted+old@revy.invalid"
+    assert user.email == "deleted+old@app.invalid"
     assert user.full_name is None

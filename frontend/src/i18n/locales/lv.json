@@ -149,7 +149,7 @@
       },
       "deleteAccount": {
         "title": "Dzēst kontu",
-        "body": "Deaktivizējiet Revy kontu. Keycloak pieteikšanās netiek dzēsta — sazinieties ar atbalstu pilnai identitātes dzēšanai.",
+        "body": "Deaktivizējiet kontu. Keycloak pieteikšanās netiek dzēsta — sazinieties ar atbalstu pilnai identitātes dzēšanai.",
         "action": "Dzēst kontu",
         "confirmTitle": "Dzēst kontu?",
         "confirmBody": "To nevar atsaukt. Jūs nekavējoties tiksiet izrakstīts.",
