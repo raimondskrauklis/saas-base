@@ -3,7 +3,7 @@
 Operator runbook: PostgreSQL 17, **this clone’s** Keycloak, local Redis, API + SPA. **Mode A** (open registration, no admin approval, no profile form).
 
 **Replace list + numbered start steps:** [APP_REPLACE.md](../platform-base/APP_REPLACE.md)  
-**Related:** [REGISTRATION_FLAGS.md](./REGISTRATION_FLAGS.md) · [KEYCLOAK_DEV_CHECKLIST.md](./KEYCLOAK_DEV_CHECKLIST.md) · [DATABASE_CONNECTION_GUIDE.md](../utils/DATABASE_CONNECTION_GUIDE.md)
+**Related:** [REGISTRATION_FLAGS.md](./REGISTRATION_FLAGS.md) · [KEYCLOAK_SETUP.md](../utils/KEYCLOAK_SETUP.md) · [KEYCLOAK_DEV_CHECKLIST.md](./KEYCLOAK_DEV_CHECKLIST.md) · [MAILGUN_SETUP.md](../utils/MAILGUN_SETUP.md) · [DATABASE_CONNECTION_GUIDE.md](../utils/DATABASE_CONNECTION_GUIDE.md)
 
 This template does not ship a running public Keycloak. Bring up your own IdP against your own Keycloak database.
 

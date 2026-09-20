@@ -304,7 +304,8 @@
         "workspacesSuspended": "Aizturētās darba vides",
         "workspacesDeleted": "Dzēstās darba vides",
         "usersActive": "Aktīvie lietotāji",
-        "usersPendingApproval": "Gaida apstiprinājumu"
+        "usersPendingApproval": "Gaida apstiprinājumu",
+        "usersSuspended": "Bloķēti lietotāji"
       },
       "pendingApprovalBanner": "{{count}} lietotājs gaida apstiprinājumu",
       "pendingApprovalBanner_other": "{{count}} lietotāji gaida apstiprinājumu",
@@ -401,16 +402,43 @@
       "requireAdminApproval": "Nepieciešams administratora apstiprinājums",
       "requireProfileForm": "Nepieciešama profila forma"
     },
-    "users": {
-      "title": "Reģistrāciju apstiprinājumi",
-      "description": "Lietotāji, kas gaida platformas piekļuvi (B režīms). A režīmā tukšs.",
-      "empty": "Nav lietotāju, kas gaida apstiprinājumu.",
+"users": {
+      "title": "Lietotāji",
+      "description": "Pārlūkot un pārvaldīt visus platformas lietotājus.",
+      "searchPlaceholder": "Meklēt pēc e-pasta vai vārda",
+      "statusFilter": "Filtrēt pēc statusa",
+      "empty": "Lietotāji nav atrasti.",
+      "notFound": "Lietotājs nav atrasts.",
+      "backToList": "Atpakaļ uz lietotājiem",
       "approve": "Apstiprināt",
       "reject": "Noraidīt",
+      "suspend": "Bloķēt lietotāju",
+      "reactivate": "Atjaunot lietotāju",
+      "sendPasswordReset": "Nosūtīt paroles atiestatīšanu",
+      "passwordResetSent": "Paroles atiestatīšanas e-pasts nosūtīts",
+      "status": {
+        "all": "Visi statusi",
+        "active": "Aktīvs",
+        "pending_approval": "Gaida apstiprinājumu",
+        "suspended": "Bloķēts",
+        "rejected": "Noraidīts",
+        "deleted": "Dzēsts"
+      },
       "columns": {
         "email": "E-pasts",
         "name": "Vārds",
-        "actions": "Darbības"
+        "status": "Statuss",
+        "role": "Loma",
+        "created": "Izveidots",
+        "actions": "Darbības",
+        "workspace": "Darba vieta"
+      },
+      "detail": {
+        "memberships": "Darba vietu dalības",
+        "status": "Statuss",
+        "role": "Loma",
+        "created": "Izveidots",
+        "updated": "Atjaunināts"
       }
     }
   },

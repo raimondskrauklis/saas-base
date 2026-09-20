@@ -1,12 +1,11 @@
 # Bugbot — review contract
 
-**Active program:** platform-base — freeze a clean SaaS template from `saas-base-v1.1` + Auth #32, no Revy product.
+**Active program:** idle — no active LOOP.
 
-When reviewing changes in scope `backend/**`, `frontend/**`, and `deploy/**`, treat these as authoritative:
-
-- [PLATFORM_BASE_P0_EXECUTION.md](../docs/platform-base/PLATFORM_BASE_P0_EXECUTION.md) — execution contract
-- [PLATFORM_BASE_FINDINGS.md](../docs/platform-base/PLATFORM_BASE_FINDINGS.md) — locked decisions
-- [PLATFORM_BASE_GENERAL_PLAN.md](../docs/platform-base/PLATFORM_BASE_GENERAL_PLAN.md) — phase goals
+Authoritative docs:
+- [docs/mini-saas/README.md](../docs/mini-saas/README.md) — program index and execution status
+- [docs/mini-saas/MINI_SAAS_FINDINGS.md](../docs/mini-saas/MINI_SAAS_FINDINGS.md) — locked decisions + closeout gap table
+- [docs/mini-saas/MINI_SAAS_GENERAL_PLAN.md](../docs/mini-saas/MINI_SAAS_GENERAL_PLAN.md) — phase goals
 
 **Agent workflow:**
 

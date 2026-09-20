@@ -304,7 +304,8 @@
         "workspacesSuspended": "Suspended workspaces",
         "workspacesDeleted": "Deleted workspaces",
         "usersActive": "Active users",
-        "usersPendingApproval": "Pending approval"
+        "usersPendingApproval": "Pending approval",
+        "usersSuspended": "Suspended users"
       },
       "pendingApprovalBanner": "{{count}} user awaiting approval",
       "pendingApprovalBanner_other": "{{count}} users awaiting approval",
@@ -402,15 +403,42 @@
       "requireProfileForm": "Require profile form"
     },
     "users": {
-      "title": "Signup approvals",
-      "description": "Review users waiting for platform access (Mode B). Empty in Mode A.",
-      "empty": "No users awaiting approval.",
+      "title": "Users",
+      "description": "Browse and manage all platform users.",
+      "searchPlaceholder": "Search by email or name",
+      "statusFilter": "Filter by status",
+      "empty": "No users found.",
+      "notFound": "User not found.",
+      "backToList": "Back to users",
       "approve": "Approve",
       "reject": "Reject",
+      "suspend": "Suspend user",
+      "reactivate": "Reactivate user",
+      "sendPasswordReset": "Send password reset",
+      "passwordResetSent": "Password reset email sent",
+      "status": {
+        "all": "All statuses",
+        "active": "Active",
+        "pending_approval": "Pending approval",
+        "suspended": "Suspended",
+        "rejected": "Rejected",
+        "deleted": "Deleted"
+      },
       "columns": {
         "email": "Email",
         "name": "Name",
-        "actions": "Actions"
+        "status": "Status",
+        "role": "Role",
+        "created": "Created",
+        "actions": "Actions",
+        "workspace": "Workspace"
+      },
+      "detail": {
+        "memberships": "Workspace memberships",
+        "status": "Status",
+        "role": "Role",
+        "created": "Created",
+        "updated": "Updated"
       }
     }
   },

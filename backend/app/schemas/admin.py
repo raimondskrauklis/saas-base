@@ -7,7 +7,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from app.constants.enums import WorkspaceStatus
+from app.constants.enums import PlatformRole, UserStatus, WorkspaceStatus
 from app.schemas.audit import AuditListItem
 
 
@@ -40,6 +40,34 @@ class AdminKpisResponse(BaseModel):
     workspaces_deleted: int
     users_active: int
     users_pending_approval: int
+    users_suspended: int
+
+
+class AdminUserListItem(BaseModel):
+    id: UUID
+    email: str
+    full_name: str | None
+    status: UserStatus
+    platform_role: PlatformRole | None
+    created_at: datetime
+
+
+class AdminWorkspaceMembershipOut(BaseModel):
+    workspace_id: UUID
+    workspace_name: str
+    role: str  # WorkspaceRole
+
+
+class AdminUserDetail(BaseModel):
+    id: UUID
+    email: str
+    full_name: str | None
+    status: UserStatus
+    platform_role: PlatformRole | None
+    impersonate_allowed: bool
+    memberships: list[AdminWorkspaceMembershipOut]
+    created_at: datetime
+    updated_at: datetime
 
 
 class AdminSettingsResponse(BaseModel):

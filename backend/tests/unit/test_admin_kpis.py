@@ -10,7 +10,7 @@ from app.services.admin_kpis import get_admin_kpis
 @pytest.mark.asyncio
 async def test_get_admin_kpis_returns_counts():
     session = AsyncMock()
-    session.scalar = AsyncMock(side_effect=[8, 2, 5, 50, 3])
+    session.scalar = AsyncMock(side_effect=[8, 2, 5, 50, 3, 1])
 
     kpis = await get_admin_kpis(session)
 
@@ -20,3 +20,4 @@ async def test_get_admin_kpis_returns_counts():
     assert kpis.workspaces_deleted == 5
     assert kpis.users_active == 50
     assert kpis.users_pending_approval == 3
+    assert kpis.users_suspended == 1

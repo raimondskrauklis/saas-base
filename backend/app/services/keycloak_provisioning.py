@@ -210,8 +210,11 @@ async def apply_keycloak_user_disabled(
     if enabled:
         if user.status == UserStatus.suspended:
             user.status = UserStatus.active
+        # no-op for any other status — enable is recovery from suspended only
     else:
-        user.status = UserStatus.suspended
+        if user.status == UserStatus.active:
+            user.status = UserStatus.suspended
+        # no-op for rejected, pending*, deleted — reject echo must not clobber
     await session.flush()
     return user
 

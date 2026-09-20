@@ -1,13 +1,25 @@
 {
-  "active_program": "platform-base",
+  "active_program": null,
   "programs": [
     {
-      "id": "platform-base",
-      "scope": ["backend/**", "frontend/**", "deploy/**"],
+      "id": "mini-saas",
+      "scope": [
+        "backend/**",
+        "frontend/**"
+      ],
       "paths": [
-        { "path": "docs/platform-base/README.md", "description": "execution" },
-        { "path": "docs/platform-base/PLATFORM_BASE_FINDINGS.md", "description": "findings" },
-        { "path": "docs/platform-base/PLATFORM_BASE_GENERAL_PLAN.md", "description": "general plan" }
+        {
+          "path": "docs/mini-saas/README.md",
+          "description": "execution"
+        },
+        {
+          "path": "docs/mini-saas/MINI_SAAS_FINDINGS.md",
+          "description": "findings"
+        },
+        {
+          "path": "docs/mini-saas/MINI_SAAS_GENERAL_PLAN.md",
+          "description": "general plan"
+        }
       ]
     }
   ],

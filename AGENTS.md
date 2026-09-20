@@ -46,11 +46,12 @@ Not installed: docs export (`md-formatting`, mermaid, docx), `staging-validation
 |-------|--------|
 | **Platform-base program** | [docs/platform-base/README.md](docs/platform-base/README.md) |
 | **Dev bootstrap** | [docs/starter-pack/DEV_BOOTSTRAP.md](docs/starter-pack/DEV_BOOTSTRAP.md) |
-| **Keycloak (dev/prod)** | [docs/starter-pack/KEYCLOAK_DEV_CHECKLIST.md](docs/starter-pack/KEYCLOAK_DEV_CHECKLIST.md) |
+| **Keycloak (dev/prod)** | [docs/utils/KEYCLOAK_SETUP.md](docs/utils/KEYCLOAK_SETUP.md) — checklist: [KEYCLOAK_DEV_CHECKLIST.md](docs/starter-pack/KEYCLOAK_DEV_CHECKLIST.md) |
 | **Registration flags** | [docs/starter-pack/REGISTRATION_FLAGS.md](docs/starter-pack/REGISTRATION_FLAGS.md) |
 | **SaaS base (W0–W8, already in the shell)** | [docs/saas-base/README.md](docs/saas-base/README.md) |
 | **Scaffold runbooks** | [docs/starter-pack/README.md](docs/starter-pack/README.md) |
 | **Stripe billing setup** | [docs/utils/STRIPE_BILLING_SETUP.md](docs/utils/STRIPE_BILLING_SETUP.md) |
+| **Mailgun + Keycloak SMTP** | [docs/utils/MAILGUN_SETUP.md](docs/utils/MAILGUN_SETUP.md) |
 | **Env examples** | `deploy/env-examples/`, `backend/.env.example`, `frontend/.env.example` |
 
 `internal-docs/` is gitignored and is **not** required to run this template.

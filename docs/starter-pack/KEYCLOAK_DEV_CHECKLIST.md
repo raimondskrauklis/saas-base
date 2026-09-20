@@ -1,6 +1,6 @@
 # Keycloak checklist
 
-Configure realm and clients so browser tokens pass `app.core.auth` validation.
+One-page smoke after the realm exists. Full clicks (service accounts, audience mapper, realm-as-code, Admin API): [KEYCLOAK_SETUP.md](../utils/KEYCLOAK_SETUP.md). SMTP for execute-actions: [MAILGUN_SETUP.md](../utils/MAILGUN_SETUP.md).
 
 **Env canon:** `backend/.env.example`, `frontend/.env.example`  
 **Audience logic:** `backend/app/core/auth.py` — allowlist `app-api` + `app-web`  
@@ -33,6 +33,10 @@ Frontend: `VITE_KEYCLOAK_REALM=app`
 | Client authentication | On |
 | Standard flow | Off (API client — tokens via service/user flows as needed) |
 | Direct access grants | Off (prefer browser via `app-web`) |
+| Service accounts roles | **On** |
+| Service account roles | `realm-management`: `manage-users`, `query-users`, `view-users` |
+
+Clicks: [KEYCLOAK_SETUP.md](../utils/KEYCLOAK_SETUP.md) §6. Without the three roles, Admin API GET/PUT users returns **403**.
 
 **Backend env:**
 
@@ -41,7 +45,7 @@ KEYCLOAK_CLIENT_ID=app-api
 KEYCLOAK_CLIENT_SECRET=<from Keycloak credentials tab>
 ```
 
-Service account / mapper: ensure access tokens intended for the API include audience or azp the backend accepts (see below).
+Audience mapper on `app-web` so access tokens include `app-api` (see [KEYCLOAK_SETUP.md](../utils/KEYCLOAK_SETUP.md) §6.3).
 
 ---
 
@@ -53,6 +57,7 @@ Service account / mapper: ensure access tokens intended for the API include audi
 | Client authentication | Off (public) |
 | Standard flow | On |
 | Valid redirect URIs | `http://localhost:5173/*`, `http://127.0.0.1:5173/*`, `https://app.example.com/*` |
+| Valid post logout redirect URIs | same hosts (required — empty list breaks logout) |
 | Web origins | `http://localhost:5173`, `http://127.0.0.1:5173`, `https://app.example.com` |
 
 **Frontend env:**
@@ -115,3 +120,5 @@ Local Mode A works with **JIT** (first `/me`). The Keycloak HTTP listener is opt
 1. Login at `http://localhost:5173`
 2. Authenticated `GET /api/v1/me` → `status: active` (Mode A) and a `users` row
 3. No repeated 401 on API calls
+4. Client-credentials GET `/admin/realms/app/users/{id}` → **200** ([KEYCLOAK_SETUP.md](../utils/KEYCLOAK_SETUP.md) §10)
+5. Realm Email test message received ([MAILGUN_SETUP.md](../utils/MAILGUN_SETUP.md)) — required before execute-actions
