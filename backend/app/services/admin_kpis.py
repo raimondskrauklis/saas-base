@@ -36,6 +36,11 @@ async def get_admin_kpis(session: AsyncSession) -> AdminKpisResponse:
         .select_from(UserORM)
         .where(UserORM.status == UserStatus.pending_approval)
     )
+    users_suspended = await session.scalar(
+        select(func.count())
+        .select_from(UserORM)
+        .where(UserORM.status == UserStatus.suspended)
+    )
 
     return AdminKpisResponse(
         workspaces_total=workspaces_total,
@@ -44,4 +49,5 @@ async def get_admin_kpis(session: AsyncSession) -> AdminKpisResponse:
         workspaces_deleted=int(workspaces_deleted or 0),
         users_active=int(users_active or 0),
         users_pending_approval=int(users_pending_approval or 0),
+        users_suspended=int(users_suspended or 0),
     )

@@ -20,7 +20,7 @@ Close the platform-console gap that W5 deferred: **in-app user directory** (list
 | Phase | File | Push | Status |
 |:---|:---|:---|:---|
 | P0 — Shared infra | [MINI_SAAS_P0_EXECUTION.md](./MINI_SAAS_P0_EXECUTION.md) | local | done |
-| P1 — Keycloak Admin helper | [MINI_SAAS_P1_EXECUTION.md](./MINI_SAAS_P1_EXECUTION.md) | first-push | pending |
+| P1 — Keycloak Admin helper | [MINI_SAAS_P1_EXECUTION.md](./MINI_SAAS_P1_EXECUTION.md) | first-push | done |
 | P2 — Directory APIs | [MINI_SAAS_P2_EXECUTION.md](./MINI_SAAS_P2_EXECUTION.md) | local | pending |
 | P3 — Lifecycle mutations | [MINI_SAAS_P3_EXECUTION.md](./MINI_SAAS_P3_EXECUTION.md) | local | pending |
 | P4 — Admin users UI | [MINI_SAAS_P4_EXECUTION.md](./MINI_SAAS_P4_EXECUTION.md) | batch | pending |
