@@ -26,21 +26,9 @@ from app.services.admin_users import (
 )
 from app.services.admin_users import get_admin_user_detail as _get_admin_user_detail
 from app.services.admin_users import list_admin_users as _list_admin_users
-from app.services.users import build_me_response, list_pending_users
+from app.services.users import build_me_response
 
 router = APIRouter(prefix="/users", tags=["admin-users"])
-
-
-@router.get("/pending", response_model=SuccessResponse[list[PendingUserResponse]])
-async def get_pending_users(
-    _admin: Annotated[CurrentUser, Depends(require_super_admin())],
-    _allowed: Annotated[CurrentUser, Depends(require_impersonation_allowed())],
-    session: Annotated[AsyncSession, Depends(get_db)],
-) -> SuccessResponse[list[PendingUserResponse]]:
-    users = await list_pending_users(session)
-    return SuccessResponse(
-        data=[PendingUserResponse.model_validate(user) for user in users],
-    )
 
 
 @router.get("", response_model=SuccessResponse[CursorResponse[AdminUserListItem]])

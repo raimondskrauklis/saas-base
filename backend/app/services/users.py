@@ -226,16 +226,6 @@ async def set_active_workspace(
     )
 
 
-async def list_pending_users(session: AsyncSession) -> list[UserORM]:
-    return list(
-        await session.scalars(
-            select(UserORM)
-            .where(UserORM.status == UserStatus.pending_approval)
-            .order_by(UserORM.created_at.asc())
-        )
-    )
-
-
 async def approve_pending_user(session: AsyncSession, user_id: UUID) -> UserORM:
     user = await session.scalar(
         select(UserORM).where(UserORM.id == user_id).with_for_update()

@@ -66,6 +66,10 @@ export function AdminDashboardPage() {
               label={t('admin.dashboard.kpis.usersPendingApproval')}
               value={kpis.users_pending_approval}
             />
+            <KpiCard
+              label={t('admin.dashboard.kpis.usersSuspended')}
+              value={kpis.users_suspended}
+            />
           </div>
 
           {kpis.users_pending_approval > 0 ? (

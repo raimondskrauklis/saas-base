@@ -19,12 +19,3 @@ async def test_workspace_members_list_envelope(async_client):
     assert "has_next" in data["cursor"]
     assert isinstance(data["items"], list)
     assert any(item["user_id"] == str(SEED_USER_ID) for item in data["items"])
-
-
-@pytest.mark.asyncio
-async def test_admin_pending_users_forbidden_for_workspace_admin(async_client):
-    response = await async_client.get("/api/v1/admin/users/pending")
-    assert response.status_code == 403
-    body = response.json()
-    assert "error" in body
-    assert "message" in body

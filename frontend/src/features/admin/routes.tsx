@@ -7,6 +7,7 @@ import { AdminDashboardPage } from '@/features/admin/pages/AdminDashboardPage';
 import { AdminSettingsPage } from '@/features/admin/pages/AdminSettingsPage';
 import { AdminUsersPage } from '@/features/admin/pages/AdminUsersPage';
 import { AuditSearchPage } from '@/features/admin/pages/AuditSearchPage';
+import { UserDetailPage } from '@/features/admin/pages/UserDetailPage';
 import { WorkspaceDetailPage } from '@/features/admin/pages/WorkspaceDetailPage';
 import { WorkspacesPage } from '@/features/admin/pages/WorkspacesPage';
 
@@ -25,6 +26,7 @@ export const adminRoutes = {
             { path: 'workspaces', element: <WorkspacesPage /> },
             { path: 'workspaces/:workspaceId', element: <WorkspaceDetailPage /> },
             { path: 'users', element: <AdminUsersPage /> },
+            { path: 'users/:userId', element: <UserDetailPage /> },
             { path: 'audit', element: <AuditSearchPage /> },
             { path: 'settings', element: <AdminSettingsPage /> },
           ],

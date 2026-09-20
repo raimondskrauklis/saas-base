@@ -23,6 +23,7 @@ describe('AdminDashboardPage', () => {
       workspaces_deleted: 3,
       users_active: 50,
       users_pending_approval: 0,
+      users_suspended: 1,
     });
 
     render(
@@ -45,6 +46,7 @@ describe('AdminDashboardPage', () => {
       workspaces_deleted: 0,
       users_active: 5,
       users_pending_approval: 2,
+      users_suspended: 0,
     });
 
     render(
