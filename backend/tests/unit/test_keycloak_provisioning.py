@@ -14,6 +14,7 @@ from app.models.workspace_memberships import WorkspaceMembershipORM
 from app.models.workspaces import WorkspaceORM
 from app.services.keycloak_provisioning import (
     apply_keycloak_user_deleted,
+    apply_keycloak_user_disabled,
     provision_user_from_keycloak,
 )
 from app.services.users import BOOTSTRAP_KEYCLOAK_PLACEHOLDER
@@ -496,3 +497,159 @@ async def test_provision_does_not_revive_deleted_user():
     assert user.status == UserStatus.deleted
     assert user.email == "deleted+old@app.invalid"
     assert user.full_name is None
+
+
+# ——— Q17 inbound status machine ———
+
+@pytest.mark.asyncio
+async def test_disable_active_sets_suspended():
+    session = _session_with_flush()
+    user = UserORM(
+        keycloak_user_id="kc-1",
+        email="user@example.com",
+        status=UserStatus.active,
+    )
+    with patch(
+        "app.services.keycloak_provisioning.get_user_by_keycloak_id",
+        new_callable=AsyncMock,
+        return_value=user,
+    ):
+        result = await apply_keycloak_user_disabled(
+            session, sub="kc-1", enabled=False,
+        )
+    assert result is user
+    assert user.status == UserStatus.suspended
+
+
+@pytest.mark.asyncio
+async def test_disable_rejected_is_noop():
+    session = _session_with_flush()
+    user = UserORM(
+        keycloak_user_id="kc-1",
+        email="rejected@example.com",
+        status=UserStatus.rejected,
+    )
+    with patch(
+        "app.services.keycloak_provisioning.get_user_by_keycloak_id",
+        new_callable=AsyncMock,
+        return_value=user,
+    ):
+        result = await apply_keycloak_user_disabled(
+            session, sub="kc-1", enabled=False,
+        )
+    assert result is user
+    assert user.status == UserStatus.rejected
+
+
+@pytest.mark.asyncio
+async def test_disable_pending_approval_is_noop():
+    session = _session_with_flush()
+    user = UserORM(
+        keycloak_user_id="kc-1",
+        email="pending@example.com",
+        status=UserStatus.pending_approval,
+    )
+    with patch(
+        "app.services.keycloak_provisioning.get_user_by_keycloak_id",
+        new_callable=AsyncMock,
+        return_value=user,
+    ):
+        result = await apply_keycloak_user_disabled(
+            session, sub="kc-1", enabled=False,
+        )
+    assert result is user
+    assert user.status == UserStatus.pending_approval
+
+
+@pytest.mark.asyncio
+async def test_enable_suspended_sets_active():
+    session = _session_with_flush()
+    user = UserORM(
+        keycloak_user_id="kc-1",
+        email="suspended@example.com",
+        status=UserStatus.suspended,
+    )
+    with patch(
+        "app.services.keycloak_provisioning.get_user_by_keycloak_id",
+        new_callable=AsyncMock,
+        return_value=user,
+    ):
+        result = await apply_keycloak_user_disabled(
+            session, sub="kc-1", enabled=True,
+        )
+    assert result is user
+    assert user.status == UserStatus.active
+
+
+@pytest.mark.asyncio
+async def test_enable_rejected_is_noop():
+    session = _session_with_flush()
+    user = UserORM(
+        keycloak_user_id="kc-1",
+        email="rejected@example.com",
+        status=UserStatus.rejected,
+    )
+    with patch(
+        "app.services.keycloak_provisioning.get_user_by_keycloak_id",
+        new_callable=AsyncMock,
+        return_value=user,
+    ):
+        result = await apply_keycloak_user_disabled(
+            session, sub="kc-1", enabled=True,
+        )
+    assert result is user
+    assert user.status == UserStatus.rejected
+
+
+@pytest.mark.asyncio
+async def test_enable_deleted_is_noop():
+    session = _session_with_flush()
+    user = UserORM(
+        keycloak_user_id="kc-1",
+        email="deleted@example.com",
+        status=UserStatus.deleted,
+    )
+    with patch(
+        "app.services.keycloak_provisioning.get_user_by_keycloak_id",
+        new_callable=AsyncMock,
+        return_value=user,
+    ):
+        result = await apply_keycloak_user_disabled(
+            session, sub="kc-1", enabled=True,
+        )
+    assert result is user
+    assert user.status == UserStatus.deleted
+
+
+@pytest.mark.asyncio
+async def test_disable_deleted_is_noop():
+    session = _session_with_flush()
+    user = UserORM(
+        keycloak_user_id="kc-1",
+        email="deleted@example.com",
+        status=UserStatus.deleted,
+    )
+    with patch(
+        "app.services.keycloak_provisioning.get_user_by_keycloak_id",
+        new_callable=AsyncMock,
+        return_value=user,
+    ):
+        result = await apply_keycloak_user_disabled(
+            session, sub="kc-1", enabled=False,
+        )
+    assert result is user
+    assert user.status == UserStatus.deleted
+
+
+@pytest.mark.asyncio
+async def test_disable_unknown_user_is_none():
+    session = _session_with_flush()
+    with patch(
+        "app.services.keycloak_provisioning.get_user_by_keycloak_id",
+        new_callable=AsyncMock,
+        return_value=None,
+    ):
+        result = await apply_keycloak_user_disabled(
+            session, sub="unknown", enabled=False,
+        )
+    assert result is None

@@ -95,6 +95,12 @@ apiClient.interceptors.response.use(
       }
       return Promise.reject(error);
     }
+    if (error.response?.status === 403 && body?.error === 'account_suspended') {
+      if (!window.location.pathname.startsWith('/account-suspended')) {
+        window.location.assign('/account-suspended');
+      }
+      return Promise.reject(error);
+    }
 
     const keycloak = getKeycloakInstance();
     if (error.response?.status === 401 && keycloak) {

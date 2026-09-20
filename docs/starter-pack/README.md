@@ -21,6 +21,6 @@ Execution plans peer-reviewed (final pass 2026-07-24) — see findings § Peer r
 | P3 — Shared platform hardening | [SCAFFOLD_P3_EXECUTION.md](./SCAFFOLD_P3_EXECUTION.md) | Done (2026-07-24) |
 | P5 — Agent & cursor identity | [SCAFFOLD_P5_EXECUTION.md](./SCAFFOLD_P5_EXECUTION.md) | Done (2026-07-25) |
 
-**Authority:** `internal-docs/starter-pack/` (gitignored). Committed runbooks: `DEV_BOOTSTRAP.md`, `REGISTRATION_FLAGS.md`, `KEYCLOAK_DEV_CHECKLIST.md`. Agent entry: root [`AGENTS.md`](../../AGENTS.md).
+**Authority:** `internal-docs/starter-pack/` (gitignored). Committed runbooks: `DEV_BOOTSTRAP.md`, `REGISTRATION_FLAGS.md`, `KEYCLOAK_DEV_CHECKLIST.md`; full Keycloak/Mailgun/Spaces/API-keys in [`docs/utils/`](../utils/README.md). Agent entry: root [`AGENTS.md`](../../AGENTS.md).
 
 **Next:** Scaffold + SaaS base complete. CI tests: set `SKIP_CI_TESTS: "false"` in deploy workflow when Actions secrets are ready.
