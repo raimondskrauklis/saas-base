@@ -24,11 +24,13 @@ Close the platform-console gap that W5 deferred: **in-app user directory** (list
 | P2 — Directory APIs | [MINI_SAAS_P2_EXECUTION.md](./MINI_SAAS_P2_EXECUTION.md) | local | done |
 | P3 — Lifecycle mutations | [MINI_SAAS_P3_EXECUTION.md](./MINI_SAAS_P3_EXECUTION.md) | local | done |
 | P4 — Admin users UI | [MINI_SAAS_P4_EXECUTION.md](./MINI_SAAS_P4_EXECUTION.md) | batch | done |
-| P5 — Revy review | [MINI_SAAS_P5_EXECUTION.md](./MINI_SAAS_P5_EXECUTION.md) | batch | pending |
-| P6 — Closeout + `saas-base-v3` | [MINI_SAAS_P6_EXECUTION.md](./MINI_SAAS_P6_EXECUTION.md) | batch | pending |
+| P5 — Revy review | [MINI_SAAS_P5_EXECUTION.md](./MINI_SAAS_P5_EXECUTION.md) | batch | done |
+| P6 — Closeout + `saas-base-v3` | [MINI_SAAS_P6_EXECUTION.md](./MINI_SAAS_P6_EXECUTION.md) | batch | done |
 
-**Next:** `execution-peer-review` on this folder, then `phase-execution` from P0. After P6: tag **`saas-base-v3`**, copy into `../irbene_gate`.
+**Next:** tag `saas-base-v3` on main after merge; copy into `../irbene_gate`.
 
 **Precedent:** KP platform-console users + Keycloak Admin (`enabled`, execute-actions). Session logout (KP did not). Do not copy institutions or KP’s silent Admin client.
 
 **W5 lock this program reverses:** “No in-app user directory — identity ops via Keycloak Admin link” (`docs/saas-base/waves/SAAS_BASE_W5_EXECUTION.md`).
+
+| `saas-base-v3` | annotated tag on `main` after merge | SHA: `__AFTER_MERGE__` |

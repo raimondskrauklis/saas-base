@@ -11,7 +11,7 @@ Wave **W5** of [`SAAS_BASE_W5_PLATFORM_GENERAL_PLAN.md`](../SAAS_BASE_W5_PLATFOR
 ## Decisions locked for W5
 
 - All `/api/v1/admin/*` routes: `Depends(require_super_admin())` — `users.platform_role == super_admin` via `CurrentUser.is_super_admin`; **not** `Permission.admin_workspaces` and **not** workspace membership.
-- **No in-app user directory** — identity ops via Keycloak Admin link on `/admin/settings`; polish existing Mode B queue at `/admin/users` only.
+- **No in-app user directory** — identity ops via Keycloak Admin link on `/admin/settings`; polish existing Mode B queue at `/admin/users` only. **Superseded by `docs/mini-saas/` program — in-app user directory is now shipped (P0–P4).**
 - **Suspended workspaces:** `POST .../suspend` sets `workspaces.status = suspended`; `unsuspend` → `active`. Tenant APIs for members of a suspended workspace return `ForbiddenError` (`error_code=workspace_suspended`) — enforce in `get_current_user` / workspace resolution when `X-Workspace-Id` points at suspended workspace.
 - **Admin workspace APIs:**
 

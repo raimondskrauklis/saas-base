@@ -288,3 +288,22 @@ Pass/fail (for a later plan — not work now):
 - `docs/utils/MAILGUN_SETUP.md` — Keycloak SMTP + app HTTP API
 - `docs/utils/SPACES_STORAGE.md`, `docs/utils/API_KEYS.md` — follow-on contracts
 - Keycloak 26 Admin: `PUT /admin/realms/{realm}/users/{id}`, `POST …/users/{id}/logout`, `PUT …/users/{id}/execute-actions-email`
+
+---
+
+## Closeout gap table (P6)
+
+Reviewed P0–P5 shipped code against findings + general plan.
+
+| Gap | Severity | Action |
+|-----|----------|--------|
+| Q18 (Spaces storage) — intentionally out of scope for this program | deferred | later |
+| Q19 (API keys) — intentionally out of scope | deferred | later |
+| Q20 (realm-as-code, live Keycloak SMTP/clicks) — operator-only, not program scope | deferred | later |
+| Inbound `ADMIN*` webhooks remain latent until Q20 applied by operators | known limitation | later |
+| Copy into `../irbene_gate` — not performed here (separate step) | deferred | later |
+
+No `fix-now` gaps. Plan fully shipped.
+
+
+**Tag:** `saas-base-v3` will be an annotated tag on `main` after merge. SHA slot: `__AFTER_MERGE__`. Actual SHA recorded post-merge.

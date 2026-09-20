@@ -147,7 +147,7 @@ Industry consensus (2025–2026): group by **user mental model and scope**. Wave
 
 ### D. Platform super-admin (W5 + W7)
 
-**Locked:** workspace directory, KPI dashboard, audit search, platform settings. **No in-app user directory** — Keycloak Admin for identity; full user panel = **future program**. Impersonation = W7.
+**Locked:** workspace directory, KPI dashboard, audit search, platform settings. **No in-app user directory** — Keycloak Admin for identity; full user panel = **future program** — **superseded: user directory shipped in `docs/mini-saas/`.** Impersonation = W7.
 
 | Section | Wave | Revy state |
 |---------|------|------------|

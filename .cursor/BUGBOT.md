@@ -1,12 +1,11 @@
 # Bugbot — review contract
 
-**Active program:** mini-saas — in-app user directory, lifecycle mutations, Keycloak Admin helper.
+**Active program:** idle — no active LOOP.
 
-When reviewing changes in scope `backend/**` and `frontend/**`, treat these as authoritative:
-
-- [MINI_SAAS_P0_EXECUTION.md](../docs/mini-saas/MINI_SAAS_P0_EXECUTION.md) — execution contract
-- [MINI_SAAS_FINDINGS.md](../docs/mini-saas/MINI_SAAS_FINDINGS.md) — locked decisions
-- [MINI_SAAS_GENERAL_PLAN.md](../docs/mini-saas/MINI_SAAS_GENERAL_PLAN.md) — phase goals
+Authoritative docs:
+- [docs/mini-saas/README.md](../docs/mini-saas/README.md) — program index and execution status
+- [docs/mini-saas/MINI_SAAS_FINDINGS.md](../docs/mini-saas/MINI_SAAS_FINDINGS.md) — locked decisions + closeout gap table
+- [docs/mini-saas/MINI_SAAS_GENERAL_PLAN.md](../docs/mini-saas/MINI_SAAS_GENERAL_PLAN.md) — phase goals
 
 **Agent workflow:**
 
