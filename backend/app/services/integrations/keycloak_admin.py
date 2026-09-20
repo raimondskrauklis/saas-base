@@ -74,20 +74,6 @@ class KeycloakAdminClient:
             await self._get_token()
         return {"Authorization": f"Bearer {self._token}", "Content-Type": "application/json"}
 
-    async def _retry_on_401(self, call: callable[..., Any], *args: Any, **kwargs: Any) -> Any:
-        """Call the bound method; on 401, re-authenticate and retry once."""
-        result = await call(self, *args, **kwargs)
-        # None of our callables return None on success, so None means the
-        # method returned nothing (e.g. logout 204) — call succeeded.
-        return result
-
-    async def _handle_response_401(self, response: httpx.Response) -> None:
-        if response.status_code == 401:
-            self._token = None  # force re-auth on next call
-            raise KeycloakAdminError(
-                message="Keycloak Admin API returned 401 — token may have expired",
-            )
-
     async def get_user(self, user_id: str) -> dict[str, Any]:
         client = await self._http_client()
         try:
