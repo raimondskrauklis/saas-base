@@ -1,44 +1,95 @@
 # saas-base
 
-Open-source foundation for **small SaaS tools built around data pipelines, science workflows, and ML operations**.
+Engineering lab for **RF, space, and sensor data pipelines**.
 
-`saas-base` is a real, runnable starting point: FastAPI + React + PostgreSQL + Keycloak, with multi-tenant workspaces, user management, billing hooks, and audit logging already wired. I use it to spin up focused products — starting with observatory data quality and pipeline workflows, then expanding to other science and ML verticals.
+This repo is both a **reusable SaaS shell** (FastAPI + React + PostgreSQL + Keycloak) and the starting point for real products built around messy signal data. The first concrete problem we are attacking is **RFI detection and filtering in radio-astronomy observations using machine learning**, with a parallel track on **scaling astronomical data processing with Dask on HPC** and comparing it to OpenMPI-style workflows.
 
-If you are a researcher or scientist with a **data-pipeline problem** — messy files that need to become inspectable objects, human-in-the-loop decisions, or reproducible processing steps — this is the shape of the toolset I am building for. [Get in touch](#contact).
+If you work with noisy radar, RF, or sensor data and need a small, opinionated system to turn raw files into inspectable objects, decisions, and actions — [get in touch](#contact).
+
+---
+
+## Why this exists
+
+Science teams often get stuck between two bad options:
+
+1. **One-off notebooks and scripts** that nobody trusts in production.
+2. **Heavy platforms** that force the science into their shape.
+
+We are trying a third path: a **thin, domain-native layer** where data becomes objects a human can inspect, override, and act on, with an audit trail back to the source file. The focus is on the loop, not the dashboard:
+
+```
+raw signal / dump / log
+        │
+        ▼
+  parse + validate
+        │
+        ▼
+  cleaned objects  ──►  model / rule flags an issue
+        │                       │
+        ▼                       ▼
+  human review ────────►  action (keep, drop, reprocess, assign)
+        │
+        ▼
+   audit trail + downstream output
+```
+
+For radio astronomy this means: an observation or scan is an object; suspected RFI is a claim attached to it; the operator accepts, quarantines, or escalates; every decision is logged. ML improves the claims; operators keep the final say.
+
+This thinking is heavily inspired by how Palantir builds closed-loop data-to-action systems, but implemented here as lightweight, open-source components that stay close to the domain.
 
 ---
 
 ## What is here now
 
-| Layer | Tech | What it gives you |
-|-------|------|-------------------|
-| **Backend** | Python 3.12, FastAPI, SQLAlchemy 2.0 async, Pydantic v2 | Multi-env database routing, hand-written Alembic migrations, Keycloak JWT auth, cursor pagination, structured errors, Celery tasks |
-| **Frontend** | React 19, TypeScript strict, Vite, Tailwind 4 | Workspace-scoped UI, admin user directory, settings, impersonation UI, EN + LV i18n |
-| **Auth** | Keycloak 26 | JWT + JWKS caching, service-account helper, lifecycle actions (suspend, reactivate, delete) |
-| **Billing** | Stripe (optional) | Checkout, Customer Portal, webhook scaffolding; disable with `STRIPE_ENABLED=false` |
-| **Tests** | pytest + Vitest | Unit + HTTP smoke tests, mocked external services |
+| Layer | Tech | Purpose |
+|-------|------|---------|
+| **Backend** | Python 3.12, FastAPI, SQLAlchemy 2.0 async, Pydantic v2, Celery | Multi-tenant API, hand-written Alembic migrations, Keycloak JWT auth, audit logging, billing hooks |
+| **Frontend** | React 19, TypeScript strict, Vite, Tailwind 4 | Workspace UI, user directory, settings, admin tools, EN + LV i18n |
+| **Auth** | Keycloak 26 | JWT + JWKS cache, service-account helper, user lifecycle |
+| **Billing** | Stripe (optional) | Checkout / Portal scaffolding; disable with `STRIPE_ENABLED=false` |
+| **Tests** | pytest + Vitest | Unit + HTTP smoke tests |
 
-Not included: a specific domain. That is intentional — this repo is the chassis. Domain code (RFI flagging, observation quality gates, pipeline run desks, etc.) lives in product repos that consume this template.
+This is the chassis. Domain code for RFI, radar tracks, or sensor pipelines will live in product repos that consume this template.
 
 ---
 
-## Why I am building this
+## Active research directions
 
-Most science teams I talk to do not need a generic dashboard. They need a **decision loop**: raw data → validated objects → human review → action → audit trail. The pattern shows up in radio astronomy, radar, environmental monitoring, and any lab where a human still has to sign off on a file before downstream analysis.
+### 1. RFI detection and filtering for radio astronomy
 
-`saas-base` captures the repeatable half of that loop so I can focus on the domain half:
+**Problem:** Radio-astronomy observations are contaminated by human-made radio frequency interference. Separating real celestial signal from RFI is still often manual or based on brittle heuristics.
 
-- identity, workspaces, and permissions,
-- audit logging and lifecycle,
-- UI patterns for listing, inspecting, and acting on objects,
-- deployment runbooks (Keycloak, Postgres, TLS, CI/CD),
-- a clean starting point for science/ML product work.
+**Approach we are exploring:**
+- Represent observations and scans as objects with lineage back to raw files.
+- Train lightweight ML classifiers (and later segmentation models) to flag suspected RFI in time-frequency space.
+- Surface claims in an operator UI with enough context to accept, quarantine, or override.
+- Use every override as training signal.
+
+**First consumer:** observatory data-quality workflows at Irbene / VIRAC.
+
+### 2. Dask for HPC-scale astronomical data processing
+
+**Problem:** Correlation and post-processing pipelines for large radio astronomy datasets are traditionally written with MPI. Dask offers a higher-level, Python-native alternative, but its fit for this workload is not proven.
+
+**Approach we are exploring:**
+- Port a representative processing step to Dask and benchmark it against an OpenMPI baseline on the same hardware.
+- Measure scheduling overhead, I/O patterns, and memory usage for real-ish data shapes.
+- Document when Dask wins, when MPI wins, and where a hybrid model makes sense.
+
+---
+
+## Who this is for
+
+- **Radio astronomers and RF engineers** dealing with RFI, spectrograms, and observation quality gates.
+- **Radar / remote-sensing teams** with messy sensor data that needs human-in-the-loop decisions.
+- **Science software engineers** who want a small, auditable platform instead of a pile of scripts.
+- **Anyone building Palantir-style data-to-action loops** without the platform lock-in.
+
+If your data looks like “files arrive, someone eyeballs them, someone decides, downstream analysis happens,” we should talk.
 
 ---
 
 ## Quick start
-
-You need Python 3.12, Node 24, a local PostgreSQL, and a Keycloak instance. Then:
 
 ```bash
 # Backend
@@ -52,24 +103,22 @@ npm install
 npm run dev
 ```
 
-See [docs/starter-pack/DEV_BOOTSTRAP.md](docs/starter-pack/DEV_BOOTSTRAP.md) and [docs/utils/KEYCLOAK_SETUP.md](docs/utils/KEYCLOAK_SETUP.md) for the full setup.
+Full setup: [docs/starter-pack/DEV_BOOTSTRAP.md](docs/starter-pack/DEV_BOOTSTRAP.md) and [docs/utils/KEYCLOAK_SETUP.md](docs/utils/KEYCLOAK_SETUP.md).
 
 ---
 
 ## Project status
 
-This repository is the public home of the template. It is already used as the base for [`irbene-gate`](https://github.com/raimondskrauklis/irbene-gate), an observatory data-quality product built for the VIRAC team at Irbene. Future science/ML projects will fork from here.
-
-Engineering history is preserved in `docs/platform-base/`, `docs/mini-saas/`, and `docs/saas-base/` as a transparent build log. These docs describe the evolution of the template, not a shipped product feature set.
+Private engineering lab. The repo is intentionally not public yet while the first RFI prototype is being shaped. Engineering history is preserved in `docs/platform-base/`, `docs/mini-saas/`, and `docs/saas-base/` as a transparent build log.
 
 ---
 
 ## Contact
 
-If you have a data-pipeline or ML problem that needs a small, opinionated SaaS tool — especially in science, engineering, or operations — I would like to hear about it.
+- Open a GitHub issue or discussion.
+- Email: raimonds [at] createit.digital
 
-- GitHub issues and discussions are open.
-- Email: raimonds [at] gmail.com
+If you are a scientist with messy RF, radar, or sensor data and want to collaborate or just describe your problem, reach out. We are building this in the open with real partners.
 
 ---
 
