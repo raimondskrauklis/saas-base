@@ -1,0 +1,27 @@
+{
+  "active_program": null,
+  "programs": [
+    {
+      "id": "mini-saas",
+      "scope": [
+        "backend/**",
+        "frontend/**"
+      ],
+      "paths": [
+        {
+          "path": "docs/mini-saas/README.md",
+          "description": "execution"
+        },
+        {
+          "path": "docs/mini-saas/MINI_SAAS_FINDINGS.md",
+          "description": "findings"
+        },
+        {
+          "path": "docs/mini-saas/MINI_SAAS_GENERAL_PLAN.md",
+          "description": "general plan"
+        }
+      ]
+    }
+  ],
+  "rule_packs_catalog": {}
+}

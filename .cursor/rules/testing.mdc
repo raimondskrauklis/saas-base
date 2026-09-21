@@ -1,0 +1,26 @@
+---
+description: Testing conventions — pytest and Vitest
+globs: "**/tests/**,**/*.test.*,**/*.spec.*"
+alwaysApply: false
+---
+
+# Testing
+
+## Backend (pytest)
+
+- Default: mocked service-layer tests in `backend/tests/unit/`
+- HTTP contract smokes in `backend/tests/api/` (status / envelope / 401 / 403). Empty `tests/service/` — do not add.
+- Env: `TEST_DATABASE_URL` for `db_session` and L1 seed; `alembic -x test=true` after migration pauses. Unit tests still mock; `db_session` skips if the URL is unset. Seed refuses a DB name without `test`.
+- Run: `pipenv run pytest tests/unit/ tests/api/` (from `backend/`)
+
+## Frontend (Vitest + Testing Library)
+
+- Colocate: `*.test.ts(x)` next to source
+- Run: `npm test` (from `frontend/`)
+
+## When to write tests
+
+- ✅ New services/hooks, validation, bug fixes (regression)
+- ❌ Styling-only changes
+
+`backend/scripts/seed_test_data.py` upserts L1 user + workspace + membership (fixed UUIDs) on `TEST_DATABASE_URL` only. Do not copy product-domain seed scripts.

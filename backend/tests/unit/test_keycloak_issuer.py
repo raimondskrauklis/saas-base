@@ -1,0 +1,50 @@
+# backend/tests/unit/test_keycloak_issuer.py
+"""KEYCLOAK_ISSUER vs internal KEYCLOAK_URL — production docker pattern."""
+from unittest.mock import patch
+
+from app.core.config import Settings
+
+
+def test_keycloak_token_issuer_defaults_to_keycloak_url():
+    settings = Settings(
+        _env_file=None,
+        environment="development",
+        dev_database_url="postgresql+asyncpg://localhost/app",
+        redis_url="redis://localhost:6379/0",
+        secret_key="test",
+        allowed_origins="http://localhost:5173",
+        keycloak_url="http://localhost:8080",
+        keycloak_realm="app",
+        keycloak_client_id="app-api",
+        keycloak_client_secret="secret",
+    )
+
+    assert settings.keycloak_token_issuer == "http://localhost:8080/realms/app"
+
+
+def test_keycloak_token_issuer_uses_public_override():
+    settings = Settings(
+        _env_file=None,
+        environment="production",
+        production_database_url="postgresql+asyncpg://localhost/app",
+        redis_url="redis://localhost:6379/0",
+        secret_key="test",
+        allowed_origins="https://app.example.com",
+        keycloak_url="http://keycloak:8080",
+        keycloak_realm="app",
+        keycloak_client_id="app-api",
+        keycloak_client_secret="secret",
+        keycloak_issuer="https://auth.app.example.com/realms/app",
+    )
+
+    assert settings.keycloak_token_issuer == "https://auth.app.example.com/realms/app"
+
+
+def test_jwks_client_issuer_reads_settings_token_issuer():
+    from app.core.jwks import jwks_client
+
+    class _SettingsStub:
+        keycloak_token_issuer = "https://auth.app.example.com/realms/app"
+
+    with patch("app.core.jwks.settings", _SettingsStub()):
+        assert jwks_client.issuer == "https://auth.app.example.com/realms/app"

@@ -1,0 +1,16 @@
+---
+description: Semantic CSS tokens — --app-* light and dark
+globs: frontend/**/*.{tsx,ts,css}
+alwaysApply: false
+---
+
+# Color tokens (saas-base)
+
+1. **Source of truth**: `frontend/src/styles/tokens.css` (light + dark `--app-*`).
+2. **Only** `var(--app-*)` in feature UI (e.g. `bg-[color:var(--app-surface)]`). ❌ NO raw Tailwind chroma (`bg-blue-500`, hex in className).
+3. **Warning**: `--app-warning`. **Links**: `--app-link`. **Text on solid fills**: `text-[color:var(--app-on-accent)]`.
+4. **Borders**: hairlines `ring-1 ring-[color:var(--app-ring)]` or `shadow-[inset_0_0_0_1px_var(--app-ring)]`; **focus** `--app-ring-strong`; **input idle** `--app-input-border`.
+5. **Tables**: zebra rows `--app-table-row` / `--app-table-row-alt`.
+6. **Product brand**: fold brand hex into `tokens.css`. Do not add a second token file.
+
+See also `internal-docs/starter-pack/docs/frontend/foundations/COLOR_TOKEN_UI_GUIDE.md` (token names use `--app-*` in this repo).
