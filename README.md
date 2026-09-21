@@ -65,7 +65,7 @@ This is the chassis. Domain code for RFI, radar tracks, or sensor pipelines will
 - Surface claims in an operator UI with enough context to accept, quarantine, or override.
 - Use every override as training signal.
 
-**First consumer:** observatory data-quality workflows at Irbene / VIRAC.
+**First consumer:** private observatory data-quality partnership currently being shaped.
 
 ### 2. Dask for HPC-scale astronomical data processing
 
