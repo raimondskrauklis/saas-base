@@ -2,7 +2,7 @@
 
 A small, opinionated **foundation for SaaS tools around RF, space, and sensor data**.
 
-Right now this is a working generic shell: **FastAPI + React + PostgreSQL + Keycloak**, with multi-tenant workspaces, user management, billing hooks, and audit logging already wired. It is not an ML platform yet. It is the chassis we will grow into real products — starting with radio-astronomy RFI work and later with radar / remote-sensing pipelines.
+Right now this is a working generic shell: **FastAPI + React + PostgreSQL + Keycloak**, with multi-tenant workspaces, user management, and audit logging already wired. It is not an ML platform yet. It is the chassis we will grow into real products — starting with radio-astronomy RFI work and later with radar / remote-sensing pipelines.
 
 If you are a researcher or engineer with messy RF, radar, or sensor data and want to shape a lightweight tool around it, [get in touch](#contact).
 
@@ -15,10 +15,11 @@ If you are a researcher or engineer with messy RF, radar, or sensor data and wan
 | **Backend** | Python 3.12, FastAPI, SQLAlchemy 2.0 async, Pydantic v2 | Multi-env database routing, hand-written Alembic migrations, Keycloak JWT auth, cursor pagination, structured errors, Celery tasks |
 | **Frontend** | React 19, TypeScript strict, Vite, Tailwind 4 | Workspace UI, user directory, settings, admin tools, EN + LV i18n |
 | **Auth** | Keycloak 26 | JWT + JWKS cache, service-account helper, user lifecycle |
-| **Billing** | Stripe (optional) | Checkout / Portal scaffolding; disable with `STRIPE_ENABLED=false` |
 | **Tests** | pytest + Vitest | Unit + HTTP smoke tests |
 
 That is the starting point. Domain code for RFI flagging, observation quality gates, or radar tracks will be added as we build real projects on top.
+
+The engineering approach here is influenced by [Revy](https://github.com/raimondskrauklis/revy) — our AI-assisted code-review tool — which we use as a reviewer on this repo. Both repositories share the same discipline: small, transparent, iterated in the open.
 
 ---
 
@@ -103,6 +104,8 @@ Full setup: [docs/starter-pack/DEV_BOOTSTRAP.md](docs/starter-pack/DEV_BOOTSTRAP
 ## Project status
 
 Private engineering lab. The first RFI prototype is still being shaped. Engineering history is preserved in `docs/platform-base/`, `docs/mini-saas/`, and `docs/saas-base/` as a transparent build log.
+
+We also dogfood this repo with [Revy](https://github.com/raimondskrauklis/revy), our AI-assisted code reviewer. If you are interested in how we review code, take a look there too.
 
 ---
 
