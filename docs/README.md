@@ -10,3 +10,6 @@ Each program has its own folder. Do not drop program files in this root.
 | [saas-base/](saas-base/README.md) | W0–W8 already in the frozen shell |
 | [agents/](agents/README.md) | Agent LOOP orchestration |
 | [utils/](utils/README.md) | Shared ops runbooks (Keycloak, Mailgun, Spaces, DB, Stripe, API keys) |
+| [virac/](virac/README.md) | VIRAC collaboration: RFI review loop + Dask-on-HPC findings, meeting prep |
+
+Sourced domain facts live outside `docs/`: [`corpus/irbene/`](../corpus/irbene/README.md).
