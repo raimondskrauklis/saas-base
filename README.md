@@ -97,13 +97,13 @@ npm install
 npm run dev
 ```
 
-Full setup: [docs/starter-pack/DEV_BOOTSTRAP.md](docs/starter-pack/DEV_BOOTSTRAP.md) and [docs/utils/KEYCLOAK_SETUP.md](docs/utils/KEYCLOAK_SETUP.md).
+Full setup is documented in the repo under `docs/starter-pack/` and `docs/utils/`.
 
 ---
 
 ## Project status
 
-Private engineering lab. The first RFI prototype is still being shaped. Engineering history is preserved in `docs/platform-base/`, `docs/mini-saas/`, and `docs/saas-base/` as a transparent build log.
+Private engineering lab. The first RFI prototype is still being shaped.
 
 We also dogfood this repo with [Revy](https://github.com/raimondskrauklis/revy), our AI-assisted code reviewer. If you are interested in how we review code, take a look there too.
 
@@ -112,7 +112,7 @@ We also dogfood this repo with [Revy](https://github.com/raimondskrauklis/revy),
 ## Contact
 
 - Open a GitHub issue or discussion.
-- Email: raimonds [at] createit.digital
+- Email: raimonds.krauklis [at] gmail.com
 
 If you have messy RF, radar, or sensor data and want to describe your problem — or even collaborate on a small prototype — reach out. We are building this in the open with real partners.
 
