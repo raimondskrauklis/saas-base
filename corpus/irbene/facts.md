@@ -35,6 +35,11 @@ Every line carries a source key from [sources.md](sources.md). Dates are as publ
 | Baseband format: VDIF (FlexBuff); Mark 5 at RT-16 has been retired in favour of FlexBuff | G25 |
 | Timing: T4 Science Hydrogen Maser 3000 at RT-16, distributed to RT-32 over fibre with White Rabbit; Allan variance better than 1e-15 over a day | G25 |
 | Observation control: custom scripting system executing predefined source / frequency / calibration sequences autonomously | G25 |
+| Single-dish spectral-line data chain (MDPS): each scan yields four ASCII files (`r0`, `r1`, `s0`, `s1` — two polarisations × reference/signal), processed into HDF5 tables (amplitude, corrected, smoothed, species, Tsys) plus JSON monitoring metadata | MDPS |
+| USRP X300 spectrometer: up to 50 MHz per channel, 14-bit ADC, up to 32k-point FFT | BL20 |
+| FlexBuff as of Sept 2025: 32 TB + 288 TB (36 × 8 TB), jive5ab 3.1.0; disk upgrade to 16 TB drives planned 2026; overflow onto the LOFAR data server (39 TB HDD) and 2 PB tape | TOG25 |
+| IVARS baseband mode: 8 sub-bands × 8 MHz × 2 pol × 2 bit ≈ 512 Mbit/s per station (≈ 230 GB/h) | G25 |
+| VIRAC HPC (2018): 30 nodes, 2 × Xeon E5-2630 v3, 128 GB RAM each; 10 Gbit/s GÉANT connection; 320 TB FlexBuff at the time | IT18 |
 
 ## Correlation and post-processing software
 
@@ -54,6 +59,7 @@ Every line carries a source key from [sources.md](sources.md). Dates are as publ
 | VIRAC is building a modular Dask-based processing pipeline covering calibration, RFI mitigation, spectral-line extraction and time-series analysis | G25 |
 | The named RFI approach in that pipeline is Singular Spectrum Analysis (SSA) decomposition, aimed at dynamic spectral environments | G25 |
 | Within RADIOBLOCKS, VIRAC is developing a GPU-accelerated correlator for the ISBI, modelled on the AARTFAAC correlator, with near-real-time fringe fitting and beamforming modes planned | G25, RB |
+| The public ISBI-AARTFAAC correlator is C++ / CUDA / NVRTC, built on the Tensor-Core Correlator, and stated as for NVIDIA GPUs; no AMD/HIP backend exists | ISBI, TCC |
 | Cross-correlation between the two antennas is cited as reducing RFI relative to single-dish data | G25 |
 | A VUAS bachelor project produced a real-time RFI detection tool for the LOFAR station LV614 (Python, Docker, Flask UI) | LRFI |
 
