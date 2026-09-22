@@ -68,7 +68,7 @@ Most science data projects we see fail in one of two places:
 
 We are trying a middle path: a small, auditable foundation that grows with the domain. Authentication, workspaces, audit logging, and deployment runbooks are boring but essential; getting them right early means the interesting ML and signal-processing work sits on solid ground.
 
-The design is inspired by Palantir-style data-to-action systems, but built as open, lightweight components that stay close to the science.
+The design follows the same closed-loop idea: data becomes objects, objects become decisions, and every decision is auditable — but built as open, lightweight components that stay close to the science.
 
 ---
 
