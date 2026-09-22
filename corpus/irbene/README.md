@@ -13,5 +13,6 @@ Real, sourced facts about the Ventspils International Radio Astronomy Centre (VI
 | [facts.md](facts.md) | Instruments, data chain, software, science programmes, projects, people — sourced |
 | [sources.md](sources.md) | Source keys with URLs and what each source contributes |
 | [glossary.md](glossary.md) | Radio-astronomy and HPC terms that appear in VIRAC material |
+| [software.md](software.md) | Public VIRAC repositories, the single-dish MDPS chain in detail, the IVARS reduction as an eleven-step list |
 
-Related: [docs/virac/](../../docs/virac/README.md) — findings and planning for the VIRAC collaboration.
+Related: [docs/virac/](../../docs/virac/README.md) — findings and planning for the VIRAC collaboration; [corpus/lumi/](../lumi/README.md) — LUMI operational facts.

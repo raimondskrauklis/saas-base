@@ -60,6 +60,9 @@ Every line carries a source key from [sources.md](sources.md). Dates are as publ
 | The named RFI approach in that pipeline is Singular Spectrum Analysis (SSA) decomposition, aimed at dynamic spectral environments | G25 |
 | Within RADIOBLOCKS, VIRAC is developing a GPU-accelerated correlator for the ISBI, modelled on the AARTFAAC correlator, with near-real-time fringe fitting and beamforming modes planned | G25, RB |
 | The public ISBI-AARTFAAC correlator is C++ / CUDA / NVRTC, built on the Tensor-Core Correlator, and stated as for NVIDIA GPUs; no AMD/HIP backend exists | ISBI, TCC |
+| ISBI-AARTFAAC is under active development (pushes to Sept 2026): real-time VDIF ingest over UDP per station, offline VDIF file mode, integer-delay correction fixes | ISBI, VSORG |
+| The public IVARS reduction (`ISBI_pipeline`, ParselTongue on AIPS) is an eleven-stage chain from a-priori gain through three fringe-fitting stages to spectra and continuum fluxes; step list in `software.md` | ISBIP |
+| Single-dish frequency-switching scan = four ~15 s stages (ref/sig × diode off/on); 4 096-point spectra typical; stable-component list of seven masers used for instrument-stability monitoring | MDPS |
 | Cross-correlation between the two antennas is cited as reducing RFI relative to single-dish data | G25 |
 | A VUAS bachelor project produced a real-time RFI detection tool for the LOFAR station LV614 (Python, Docker, Flask UI) | LRFI |
 

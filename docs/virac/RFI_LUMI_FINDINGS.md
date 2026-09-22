@@ -22,7 +22,7 @@ Two instruments, two data shapes, one question: *which time–frequency cells ar
 
 | Data product | Shape | Where RFI shows | ML-ready today? |
 |:---|:---|:---|:---|
-| Single-dish maser spectra (USRP X300 → MDPS) | Per scan: frequency × 2 pol, time-integrated; four ASCII files `r0 r1 s0 s1` → one HDF5 | As narrow spikes or broadband lifts in the *integrated* spectrum | **No** as dynamic spectra — unless the backend's time-resolved dumps are kept (*verify*, Q-A1) |
+| Single-dish maser spectra (USRP X300 → MDPS) | Per scan: four ~15 s stages (`r0 r1 s0 s1`), each frequency × 2 pol; 4 096 points; many scans per observation → one HDF5 | As narrow spikes or broadband lifts; native time resolution ~15 s per stage, tens of stages per observation | **Weakly** — a coarse dynamic spectrum (~15 s × 4 096 ch) exists in the archived ASCII; finer dumps need backend changes (*verify*, Q-A1) |
 | ISBI post-correlation visibilities (SFXC) | Per baseline: time (2 s) × frequency (4 096 ch maser subband; 128 ch continuum) × 4 pol products, complex | As time–frequency structures on the one baseline; cross-correlation already suppresses uncorrelated RFI | **Yes** — this is the standard segmentation input |
 | ISBI / EVN baseband (VDIF on FlexBuff) | 2-bit samples, 512 Mbit/s per station in the IVARS mode | Only after channelisation | Out of scope (companion doc) |
 | LOFAR LV614 | Station beamformed / dynamic spectra | Classic low-frequency RFI | Different instrument; deferred |
@@ -195,7 +195,7 @@ All rows are estimates from published observing modes (G25) unless keyed. VIRAC 
 
 | Q# | Question | Status | Resolution |
 |:---|:---|:---|:---|
-| Q-A1 | Does the USRP backend keep time-resolved spectra, or only per-scan integrations? | open | Ask; decides whether single-dish is ML-able |
+| Q-A1 | Finest single-dish time resolution: archived ASCII gives ~15 s per stage (MDPS); can the backend dump shorter integrations, and is the raw ASCII archive retained? | open | Ask; decides how far single-dish RFI work can go |
 | Q-A2 | Actual per-session sizes for IVARS baseband and correlated output; SFXC output format (FITS-IDI? MS? native) | open | Ask; replaces §3 estimates |
 | Q-A3 | Exact grant: LUMI-C amount ("350" = ?), TB-hours, project type, start and end dates | open | Read `lumi-allocations`; decides cut-off exposure |
 | Q-A4 | VIRAC HPC today: node count, GPUs from phase 4, Slurm? | open | Ask; reproduction target |
