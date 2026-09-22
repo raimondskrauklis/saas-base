@@ -46,15 +46,15 @@ All rows are estimates from published observing modes (G25) unless keyed. VIRAC 
 | IVARS baseband, one station | 512 Mbit/s = 230 GB/h | 8 sub-bands × 8 MHz × 2 pol × 2 bit × Nyquist (G25) |
 | IVARS baseband, both stations, one session | ~3 TB | ~6–8 h per session: 30 targets × 2 × 5–8 min + calibrators (G25) |
 | Whole IVARS raw archive (154 sessions) | ~450 TB | consistent with FlexBuff 288 + 64 TB and a 2 PB tape tier (G25, TOG25) |
-| Spectral-line pass, one baseline, correlated | ~0.25 GB/h; ~2 GB/session | 4 096 ch × 4 pol × complex64 every 2 s (G25) |
+| Spectral-line pass, one baseline, correlated | ~0.25 GB/h (one sub-band) to ~2 GB/h (all 8 sub-bands); 2–17 GB/session | 4 096 ch × 4 pol × complex64 every 2 s (G25); sub-band coverage of the line pass unknown (Q-A2) |
 | Continuum pass | ~0.12 GB/h | 16 × 128 ch × 4 pol × complex64 every 2 s (G25) |
-| Whole IVARS correlated archive | ~0.5 TB | 154 sessions × ~3 GB |
+| Whole IVARS correlated archive | ~0.5–3 TB | 154 sessions × 3–17 GB, plus 20–50 % FITS-IDI/MS overhead |
 | Single-dish maser spectrum | ~0.25 MB per pol-pair spectrum; a few MB per scan in ASCII | 32k-point FFT max, 14-bit, up to 50 MHz per channel (BL20); four files per scan (MDPS) |
 | Single-dish archive 2017–2022 | tens of GB | 42 sources, 5–7 day cadence (G25, AB23) |
 | Public LOFAR RFI set (MES22) | ~10 GB | 7 500 × 512×512 train, 109 expert test |
 | Cross-telescope RFI set 2026 (HERA, LOFAR, NSRT) | ~103 GiB HDF5 | prior pass; *verify* key |
 
-**Reading.** The ML problem is small: the entire correlated IVARS archive plus public sets is under 1 TB, fits in `/scratch` default quota (50 TB) many times over and in `/flash` default (2 TB) once. The heavy data is baseband, which we do not move. The Dask/MPI benchmark can use as much or as little baseband-derived data as the chosen step needs.
+**Reading.** The ML problem is small: the entire correlated IVARS archive plus public sets is a few TB at most, fits in `/scratch` default quota (50 TB) many times over and in `/flash` default (2 TB) once. The heavy data is baseband, which we do not move. The Dask/MPI benchmark can use as much or as little baseband-derived data as the chosen step needs.
 
 ## 4. Compute we have
 
