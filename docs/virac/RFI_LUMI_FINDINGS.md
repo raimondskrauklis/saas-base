@@ -60,7 +60,7 @@ All rows are estimates from published observing modes (G25) unless keyed. VIRAC 
 
 ### 4.1 LUMI-G (LUMI-G, BILL)
 
-- 2 978 nodes; per node one 64-core EPYC 7A53 (56 cores usable), 512 GB RAM, 4 × MI250X. Each MI250X is two GCDs; Slurm and HIP see **8 GPUs per node**, 64 GB HBM each. No local disk.
+- 2 978 nodes; per node one 64-core EPYC 7A53 (56 cores usable), 512 GB RAM, 4 × MI250X. Each MI250X is two GCDs; Slurm and HIP expose **8 GCDs per node**, each as a separate GPU device with 64 GB HBM. Billing counts MI250X modules (4 per node), not GCDs — see BILL. No local disk.
 - Billing: 1 GPU-hour = one MI250X module for one hour. `standard-g` (whole nodes): 4 GPU-h per node-hour. `small-g` / `dev-g`: 0.5 GPU-h per GCD-hour, with a surcharge if more than 8 cores or 64 GB RAM per GCD is requested.
 - **Our 4 500 GPU-h = 9 000 GCD-hours = 1 125 full-node-hours.**
 - Limits (PART): `small-g` up to 4 nodes, 3 days; `standard-g` up to 1 024 nodes, 2 days; `dev-g` 30 min – 2 h for debugging only.
@@ -204,6 +204,7 @@ All rows are estimates from published observing modes (G25) unless keyed. VIRAC 
 | Q-A7 | Ventspils University ↔ SigmaNet link capacity | open | Ask VIRAC IT |
 | Q-A8 | LUMI compute-node outbound policy and any dedicated transfer node | open | Pass-2 fetch, LUMI docs / support |
 | Q-A9 | First data product for ML: ISBI correlated (proposed) vs single-dish | proposed | ISBI correlated, C band, IVARS sessions with W3OH/G111 as the safety set |
+| Q-B3 | `torch.linalg.svd` / rocSOLVER performance on MI250X at 4 096-channel Hankel sizes — is GPU SSA worth it, or does the CPU baseline suffice? | open | Measure in P2 (SSA sweep); pass-2 literature check for KLT/SSA-on-GPU results |
 | Q-A10 | AMD (LUMI-G) vs NVIDIA-only cluster | **resolved** | LUMI-G for training and sweeps; RTU Rudens as CUDA control and the only home for CUDA-only code (correlator); zero vendor-specific code in our repos. Rationale in §4.4. Revisit only if the correlator port enters scope or hand-written kernels become necessary |
 
 ## 13. Research backlog (pass 2)

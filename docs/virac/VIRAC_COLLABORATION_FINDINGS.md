@@ -51,7 +51,7 @@ Domain terms: [`corpus/irbene/glossary.md`](../../corpus/irbene/glossary.md). Te
 | Keycloak JWT auth, JWKS cache, provisioning | `backend/app/core/auth.py`, `services/keycloak_provisioning.py` | Ready. |
 | Audit log | `backend/app/models/audit_log.py` (`AuditLogORM`), `services/audit_service.py` | Records who/what/when; flag decisions should write here. |
 | Celery + Redis workers | `backend/app/core/config.py:95-201`, `backend/app/workers/` | Job runner for ingest and baseline runs. Not an HPC scheduler — see Track B. |
-| Example tenant model with cursor pagination and filter builder | `backend/app/models/items.py` (`ItemORM`), `services/filter_query_builder.py` | Template for `Observation`, `Scan`, `Issue` ORMs. |
+| Example tenant model with cursor pagination and filter builder | `backend/app/models/items.py` (`ItemORM`), `backend/app/services/filter_query_builder.py` | Template for `Observation`, `Scan`, `Issue` ORMs. |
 | Data export job pattern | `backend/app/models/data_export_job.py` | Template for long-running artifact-producing jobs. |
 | Object storage runbook | `docs/utils/SPACES_STORAGE.md` | Where samples and flag artifacts would live. |
 | Deploy: nginx, Keycloak, env examples | `deploy/` | Dedicated-droplet pattern already exercised (Irbene Gate runbook, internal). |
@@ -152,7 +152,7 @@ Track A first unless VIRAC says the Dask pipeline is the urgent fire. A yields s
 | Q6 | Baseline set agreed before any model trains? | open | Propose AOFlagger + SSA |
 | Q7 | Compute for training: their phase-4 GPUs, ours, or cloud? | open | Ask timeline |
 | Q8 | Funding shape: student project, grant WP, paid pilot? | open | Ask |
-| Q9 | Where do these docs live — saas-base (public), a new domain repo, or internal? | open | Corpus stays public in saas-base; findings placement TBD |
+| Q9 | Where do these docs live — saas-base (public), a new domain repo, or internal? | resolved | Corpus public in `corpus/irbene/`; findings and plans public in `docs/virac/`; meeting notes in `internal-docs/virac/` (gitignored) |
 
 ## Parking lot
 
