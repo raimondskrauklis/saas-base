@@ -4,7 +4,7 @@
 
 **Status:** draft; phases fixed, numbers calibrate in P1.
 **Baseline:** [`RFI_LUMI_FINDINGS.md`](RFI_LUMI_FINDINGS.md) (problem, data, compute, transfer) and [`VIRAC_COLLABORATION_FINDINGS.md`](VIRAC_COLLABORATION_FINDINGS.md) (tracks, platform reuse, Q1–Q9).
-**Locked from findings:** ISBI post-correlation C-band visibilities are the first ML product; AOFlagger + SSA are the baselines; maser-safety FPR is the first metric; LUMI-O is the ingress/egress border; everything runs in containers; the Dask/MPI benchmark uses one `cray-python` module on identical LUMI-C nodes; the correlator is out of scope.
+**Locked from findings:** ISBI post-correlation C-band visibilities are the first ML product; AOFlagger + SSA are the baselines; maser-safety FPR is the first metric; LUMI-O is the ingress/egress border; everything runs in containers; the Dask/MPI benchmark uses one `cray-python` module on identical LUMI-C nodes; the correlator is out of scope; LUMI-G (AMD) for training, RTU (NVIDIA) as CUDA control, no vendor-specific code (Q-A10).
 **Open (calibration only):** grant details (Q-A3), single-dish time-resolved availability (Q-A1), session sizes (Q-A2).
 
 ## Cross-cutting — shipped in every phase

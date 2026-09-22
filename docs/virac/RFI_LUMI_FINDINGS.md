@@ -80,7 +80,21 @@ All rows are estimates from published observing modes (G25) unless keyed. VIRAC 
 - RTU Rudens (RTU): 1 node 4 × A100 40 GB, 2 nodes 4 × L40S, 4 nodes 2 × L40S, V100s; PBS; 100 Gbit/s to GÉANT. CUDA control runs and the only place the VIRAC GPU correlator (CUDA) runs as-is.
 - VIRAC HPC (IT18, 2018): 30 nodes, 2 × Xeon E5-2630 v3, 128 GB each, 10 Gbit/s to GÉANT; GPU nodes announced in modernisation phase 4 (M4), status *verify* (Q-A4). Reproduction target for Track B.
 
-### 4.4 Policies that shape the plan
+### 4.4 GPU vendor: why AMD is acceptable here (Q-A10)
+
+| Workload | Vendor exposure | Where it runs |
+|:---|:---|:---|
+| RFI segmentation (U-Net, Swin-UNETR) in PyTorch | None — standard conv/attention ops, DDP over RCCL; official ROCm PyTorch containers on LUMI (PYT) | LUMI-G |
+| SSA / SVD baselines | `torch.linalg.svd` → rocSOLVER; only performance at 4 096-ch Hankel sizes is unknown (Q-B3); CPU fallback trivial | LUMI-G, CPU fallback |
+| Dask vs MPI benchmark | CPU only | LUMI-C |
+| ISBI-AARTFAAC correlator (TCC: CUDA/WMMA, NVRTC) | Total — no HIP backend (TCC); Pawsey abandoned an xGPU port to MI250X (BLINK) | Never on LUMI-G; RTU or VIRAC NVIDIA if ever in scope; parked |
+
+- Reachable NVIDIA alternatives are thin: RTU Rudens is one 4 × A100 node plus a few L40S nodes, shared, PBS — enough for control runs, not sweeps (RTU). VIRAC GPU nodes: status unknown (Q-A4). Other EuroHPC NVIDIA systems need a new application with months of lead time. Meanwhile the LUMI grant is granted, sufficient, and subject to the cut-off (CUT).
+- Genuine ROCm risks — custom CUDA kernels, bleeding-edge libraries, MIOpen cache quirks — either do not apply to U-Net-class models or are handled by LUMI's containers.
+- Portability across ROCm and CUDA, proven by one control run per model on RTU (kept in P3), is itself a deliverable: a large share of EuroHPC GPU capacity is AMD.
+- Flips to NVIDIA-first if: the correlator port enters scope; hand-written kernels (Numba-CUDA, Triton beyond ROCm support) become necessary; LUMI-AI turns out NVIDIA-based (pass-2 check — PyTorch work carries over regardless).
+
+### 4.5 Policies that shape the plan
 
 - **Resource cut-off (CUT):** for projects starting on/after 1 Oct 2025, usage is checked at 6 months; if under 40 % of the allocation is used, the allocation is cut to 60 %. Warning at 3 months if under 20 %. Applies to non-industrial regular and extreme-scale projects — whether our project type is covered: *verify* (Q-A5). Plan as if it applies: **≥ 1 800 GPU-h consumed by month 6.**
 - **Project lifetime = data lifetime (STOR):** no backups anywhere on LUMI; data readable 90 days after project end, then deleted. LUMI-O is the on-LUMI backup tier; the real backup is in Latvia.
@@ -190,6 +204,7 @@ All rows are estimates from published observing modes (G25) unless keyed. VIRAC 
 | Q-A7 | Ventspils University ↔ SigmaNet link capacity | open | Ask VIRAC IT |
 | Q-A8 | LUMI compute-node outbound policy and any dedicated transfer node | open | Pass-2 fetch, LUMI docs / support |
 | Q-A9 | First data product for ML: ISBI correlated (proposed) vs single-dish | proposed | ISBI correlated, C band, IVARS sessions with W3OH/G111 as the safety set |
+| Q-A10 | AMD (LUMI-G) vs NVIDIA-only cluster | **resolved** | LUMI-G for training and sweeps; RTU Rudens as CUDA control and the only home for CUDA-only code (correlator); zero vendor-specific code in our repos. Rationale in §4.4. Revisit only if the correlator port enters scope or hand-written kernels become necessary |
 
 ## 13. Research backlog (pass 2)
 
@@ -200,6 +215,7 @@ Ordered by how much a wrong assumption would cost.
 - Official statement on compute-node outbound network access; existence of data-transfer nodes (Q-A8).
 - Measured LUMI-O ↔ Lustre and Latvia → LUMI-O throughput; recommended `rclone` concurrency on LUMI.
 - Whether Development / Benchmark / national projects are exempt from the cut-off (Q-A5).
+- LUMI-AI (2027) GPU vendor and software stack — decides whether ROCm-specific tuning has a future on LUMI or only portability matters.
 - `torch.linalg.svd` / rocSOLVER performance on MI250X for SSA at 4 096-channel Hankel sizes (Q-B3).
 - `cotainr` recipe that includes `aoflagger` (conda-forge) alongside PyTorch ROCm; or keep AOFlagger in a separate CPU container.
 - `dask-mpi` availability in `cray-python`; Dask dashboard access through Open OnDemand.
