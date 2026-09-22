@@ -26,7 +26,7 @@ Domain terms: [`corpus/irbene/glossary.md`](../../corpus/irbene/glossary.md). Te
 | Weak labels | Flags produced by a baseline algorithm |
 | Strong labels | Flags confirmed or overridden by a VIRAC scientist in the review UI |
 | Issue | The platform object representing one flagged region (time × frequency × baseline/polarisation) awaiting a human decision |
-| Track A / Track B | The RFI review loop / the Dask-on-HPC benchmark, respectively |
+| Track A / Track B | The RFI review loop / VIRAC's pipeline end-to-end on HPC (Dask vs MPI answered per step), respectively |
 
 ## What exists vs genuinely new
 
@@ -35,7 +35,7 @@ Domain terms: [`corpus/irbene/glossary.md`](../../corpus/irbene/glossary.md). Te
 | Exists | Source | Consequence for us |
 |:---|:---|:---|
 | SFXC (DiFX 2.8.1) MPI correlator; AIPS + CASA + ParselTongue reduction pipeline | G25 | Correlation is not ours. A flagger plugs in post-correlation, or on single-dish dynamic spectra. |
-| A Dask-based pipeline is *being built* covering calibration, RFI mitigation, spectral-line extraction, time-series | G25 | Track B is not "introduce Dask". It is "benchmark a step in a framework they already chose". |
+| A Dask-based pipeline is *being built* covering calibration, RFI mitigation, spectral-line extraction, time-series | G25 | Track B is not "introduce Dask". It is "make the pipeline they already chose run end-to-end on HPC, and measure Dask vs MPI per step while doing it". |
 | SSA named as the RFI decomposition method | G25 | SSA is a baseline, not a competitor. Our ML result must sit next to it. |
 | GPU correlator under RADIOBLOCKS (to Feb 2027), AARTFAAC-derived | G25, RB | Off-limits scope. Do not propose correlator work. |
 | Modernisation phase 4: HPC + GPU nodes intended for ML, data streaming | M4 | Training compute may exist on their side; timing unknown. |
@@ -82,31 +82,31 @@ Domain terms: [`corpus/irbene/glossary.md`](../../corpus/irbene/glossary.md). Te
 
 **Verification gate.** A VIRAC scientist has reviewed ≥ 1 real session end-to-end in the UI; baseline masks and ≥ 1 model result are on the same page with label provenance shown; maser-safety FPR is reported.
 
-### Track B — Dask on HPC benchmark
+### Track B — VIRAC's pipeline end-to-end on HPC (Dask vs MPI answered by building it)
 
-**Rationale.** VIRAC's own framing is "Dask vs standard / OpenMPI". SFXC is MPI because FX correlation is communication-bound (SFXC). Post-correlation steps — calibration, spectral-line extraction, time-series binning — are array-shaped and chunkable, which is where Dask has published near-linear scaling to ~80 workers with task granularity as the ceiling (AFR25a, AFR25b). The honest comparison is per-step, on their cluster, against their current implementation.
+**Rationale.** VIRAC's own framing is "Dask vs standard / OpenMPI". Read behind it: they have already chosen Dask for the new pipeline (G25) while everything they trust — SFXC — is MPI. What they need is evidence that the choice holds on their own cluster and on an HPC before RADIOBLOCKS deliverables and theses are built on it. A benchmark table does not give them that; their pipeline running end-to-end on LUMI and on their 30 nodes with a known cost model does. The Dask-vs-MPI comparison falls out of building it properly: per step, same inputs, equivalence checked, both variants kept in the harness (AFR25a, AFR25b, SFXC).
 
 **Method.**
 
-1. Pick one post-correlation step with VIRAC; obtain its current implementation (serial Python, MPI, or CASA task).
-2. Port to a Dask graph; run with `dask-jobqueue` on their scheduler.
-3. Measure wall time, peak memory, strong and weak scaling on identical inputs.
-4. Written recommendation: where Dask fits, where MPI stays, what the crossover looks like on their hardware.
+1. Obtain the current pipeline stages (ParselTongue / CASA / early Dask) and the SFXC output for a set of IVARS sessions.
+2. Make each stage a containerised, chunk-aware step with a reference implementation and an equivalence test; MPI variant where the step is communication-bound, Dask variant everywhere it is array-shaped.
+3. Run the whole chain on LUMI-C at scale and on VIRAC's cluster from the same containers; measure wall time, memory, strong and weak scaling per step.
+4. Written recommendation: where Dask fits, where MPI stays, the crossover on both machines — plus the cost model per session on LUMI.
 
-**Verification gate.** Scaling curves reproduced by a VIRAC engineer on their cluster from a committed harness; recommendation reviewed by them.
+**Verification gate.** The chain runs on VIRAC's cluster by a VIRAC engineer from the committed harness on one session; scaling curves reproduced by them; recommendation reviewed.
 
-**Not a product.** Track B produces a report and a harness. Its platform contribution is an HPC job-submission pattern for saas-base, only if it turns out to be generically useful.
+**Product.** A pipeline they run on Monday, with a benchmark memo as its by-product. Platform contribution to saas-base: HPC job-submission pattern and step/artifact lineage, only where proven generic. Complementary work enabled by having the archive next to LUMI compute is in [`COMPLEMENTARY_PROBLEMS_FINDINGS.md`](COMPLEMENTARY_PROBLEMS_FINDINGS.md).
 
 ### Sequencing
 
-Track A first unless VIRAC says the Dask pipeline is the urgent fire. A yields something used within weeks and generates the labels the ML hypothesis needs; B is a study. Both can run with two named contacts.
+Track A first unless VIRAC says the Dask pipeline is the urgent fire. A yields something used within weeks and generates the labels the ML hypothesis needs; B yields the pipeline the archive re-processing in the complementary findings depends on. Both can run with two named contacts.
 
 ## Advice / options
 
 | Option | Recommendation | Why |
 |:---|:---|:---|
 | Track A as described | **Adopt** | Uses what saas-base has; produces owned labels; honest ML answer |
-| Track B as described | **Adopt, second** | Answers their stated question; low platform coupling |
+| Track B as described | **Adopt, second** | Answers their stated question by shipping the pipeline, not a PDF; the benchmark is a by-product |
 | ML model bake-off without the review loop | **Reject** | No strong labels → results not trustworthy on their data |
 | Correlator or pre-correlation (baseband) flagging | **Reject** | RADIOBLOCKS scope; communication-bound; not ours |
 | Real-time flagging in the acquisition chain | **Defer** | Only after batch results are proven; PAT26 shows it is feasible later |
@@ -175,7 +175,7 @@ Track A first unless VIRAC says the Dask pipeline is the urgent fire. A yields s
 | Baseline harness | AOFlagger and SSA masks stored with algorithm + version; reproducible from CLI | Masks differ between runs on identical input |
 | Review loop | ≥ 1 scientist session; every decision in audit log | Decisions lost or unattributed |
 | First model | Precision / recall / F1 / AUPRC on strong labels, next to both baselines; maser FPR reported | Reported only on weak labels, or without baselines |
-| Track B harness | Scaling curves reproduced by VIRAC on their cluster | Results only from our machine |
+| Track B harness | Chain runs on VIRAC's cluster from the committed harness; scaling curves reproduced there | Results only from our machine; a report without a runnable pipeline |
 
 ## References
 

@@ -3,8 +3,8 @@
 # RFI mitigation and Dask-on-HPC on LUMI — general plan
 
 **Status:** draft; phases fixed, numbers calibrate in P1.
-**Baseline:** [`RFI_LUMI_FINDINGS.md`](RFI_LUMI_FINDINGS.md) (problem, data, compute, transfer) and [`VIRAC_COLLABORATION_FINDINGS.md`](VIRAC_COLLABORATION_FINDINGS.md) (tracks, platform reuse, Q1–Q9).
-**Locked from findings:** ISBI post-correlation C-band visibilities are the first ML product; AOFlagger + SSA are the baselines; maser-safety FPR is the first metric; LUMI-O is the ingress/egress border; everything runs in containers; the Dask/MPI benchmark uses one `cray-python` module on identical LUMI-C nodes; the correlator is out of scope; LUMI-G (AMD) for training, RTU (NVIDIA) as CUDA control, no vendor-specific code (Q-A10).
+**Baseline:** [`RFI_LUMI_FINDINGS.md`](RFI_LUMI_FINDINGS.md) (problem, data, compute, transfer), [`VIRAC_COLLABORATION_FINDINGS.md`](VIRAC_COLLABORATION_FINDINGS.md) (tracks, platform reuse, Q1–Q9), [`COMPLEMENTARY_PROBLEMS_FINDINGS.md`](COMPLEMENTARY_PROBLEMS_FINDINGS.md) (C1–C6, opt-in).
+**Locked from findings:** ISBI post-correlation C-band visibilities are the first ML product; AOFlagger + SSA are the baselines; maser-safety FPR is the first metric; LUMI-O is the ingress/egress border; everything runs in containers; Track B ships VIRAC's pipeline end-to-end on LUMI-C and their cluster, with Dask vs MPI measured per step on one `cray-python` module and identical nodes; the correlator is out of scope; LUMI-G (AMD) for training, RTU (NVIDIA) as CUDA control, no vendor-specific code (Q-A10).
 **Open (calibration only):** grant details (Q-A3), single-dish time-resolved availability (Q-A1), session sizes (Q-A2).
 
 ## Cross-cutting — shipped in every phase
@@ -45,19 +45,19 @@
 **Deliverables.** `rfi-models` package; trained checkpoints; evaluation report with baseline columns; GPU burn ≥ 40 % of grant by end of this phase.
 **Depends on.** P2; strong labels from companion Track A improve but do not block it.
 
-## P4 — Dask vs MPI benchmark on LUMI-C
+## P4 — VIRAC's pipeline end-to-end on LUMI-C (Dask vs MPI per step)
 
-**Goal.** Per-step, same-node, equivalence-checked comparison of Dask and mpi4py on VIRAC-chosen post-correlation steps, with a written recommendation.
-**Scope.** In: step selection with VIRAC (bandpass/gain application, spectral-line extraction + time-series binning, one communication-heavy step); reference implementation and equivalence test; MPI variant on Cray MPICH; Dask variant via `dask-jobqueue` / `dask-mpi` on `hsn0`; strong and weak scaling 1–16 nodes on `standard`; same harness re-run on VIRAC's cluster and RTU. Out: correlator; GPU variants of the steps unless trivially available.
-**Deliverables.** `hpc-bench` harness; scaling curves and memory profiles; recommendation memo (where Dask fits, where MPI stays, crossover on LUMI-C and on VIRAC hardware).
-**Depends on.** P1 (data), P0 (templates). Independent of P2–P3; can run in parallel once P1 lands.
+**Goal.** VIRAC's reduction chain — a-priori gain, bandpass, phase-cal, apply, spectral-line extraction, time-series binning — runs from SFXC output to light curves on LUMI-C and on VIRAC's cluster from the same containers, with Dask and MPI variants measured per step on the way.
+**Scope.** In: current stages (ParselTongue / CASA / early Dask) wrapped as containerised, chunk-aware steps with a reference implementation and equivalence test each; MPI variant on Cray MPICH where a step is communication-bound, Dask variant via `dask-jobqueue` / `dask-mpi` on `hsn0` where it is array-shaped; residual delay/phase solving as a bounded step if VIRAC confirms what is open (Q-C3); strong and weak scaling 1–16 nodes on `standard`; per-session cost model on LUMI; full chain re-run on VIRAC's cluster and RTU. Out: correlator; GPU variants unless trivially available; science interpretation.
+**Deliverables.** `virac-pipeline` package (steps, harness, Slurm/PBS profiles); one session reduced end-to-end on LUMI and on VIRAC's cluster by a VIRAC engineer; scaling curves and memory profiles per step; recommendation memo (Dask here, MPI there, crossover on both machines, cost per session).
+**Depends on.** P1 (data), P0 (templates). Independent of P2–P3; runs on LUMI-C while they use LUMI-G.
 
-## P5 — Second model wave and surplus-compute experiments
+## P5 — Second model wave and archive re-processing
 
-**Goal.** Spend the remaining grant on the experiments that are usually skipped, and lock the final model comparison.
-**Scope.** In: Swin-UNETR / WF-SwinUnet on the same splits; self-supervised pre-training on the full correlated archive if staged; ablations (with/without protected channels, with/without SSA pre-subtraction); single-dish time-resolved data if Q-A1 was "yes"; final evaluation on strong labels from the review loop. Out: new data sources.
-**Deliverables.** Final model report; recommended production configuration (baseline + model + thresholds) for VIRAC's Dask pipeline; archived checkpoints and masks on LUMI-O and in Latvia.
-**Depends on.** P3; strong labels from companion Track A.
+**Goal.** Spend the remaining grant on what is usually skipped, and produce the first uniformly re-reduced IVARS catalogue.
+**Scope.** In: Swin-UNETR / WF-SwinUnet on the same splits; cross-epoch consistency labels from the archive (C2) tested against strong labels; ablations (protected channels, SSA pre-subtraction); single-dish time-resolved data if Q-A1 was "yes"; final evaluation on strong labels from the review loop; **archive re-processing (C1)** — every staged session through the pinned P4 chain with the chosen P2/P3 masks, per-point quality flags and lineage, on LUMI-C; RFI occupancy map from baseline flags (C5). Out: new data sources; astrophysical interpretation.
+**Deliverables.** Final model report; recommended production configuration (baseline + model + thresholds) for VIRAC's pipeline; re-reduced catalogue v1 with quality flags and provenance; site RFI atlas; archived checkpoints, masks and catalogue on LUMI-O and in Latvia.
+**Depends on.** P3, P4; strong labels from companion Track A. C1–C5 are in [`COMPLEMENTARY_PROBLEMS_FINDINGS.md`](COMPLEMENTARY_PROBLEMS_FINDINGS.md) and enter only if VIRAC picks them (Q-C1).
 
 ## P6 — Hand-over and platform feedback
 
@@ -68,7 +68,7 @@
 
 ## Sequencing
 
-P0 → P1 → {P2 → P3 → P5} ∥ {P4} → P6. P4 starts as soon as P1 lands and runs on LUMI-C while P2–P3 use LUMI-G; this is also what keeps both grants burning early.
+P0 → P1 → {P2 → P3 → P5} ∥ {P4} → P6. P4 starts as soon as P1 lands and runs on LUMI-C while P2–P3 use LUMI-G; this is also what keeps both grants burning early. P5's archive re-processing is the point where Tracks A and B meet: the pinned P4 chain plus the chosen masks over every session.
 
 ## Remaining open item
 
