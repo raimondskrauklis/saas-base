@@ -2,9 +2,9 @@
 
 A multi-tenant SaaS foundation — **FastAPI + React + PostgreSQL + Keycloak** — built to grow domain tools for RF, space, and sensor data.
 
-**Status:** Active foundation; domain workflows (RFI detection, HPC processing) are exploratory and not yet in code.
+**Status:** Working generic foundation. We are exploring where it can add value for RF and radio-astronomy data problems; no domain code exists yet, and nothing is promised.
 
-Domain projects are forked from this repo. Whatever they need generically — ML pipeline plumbing, signal-processing steps, review loops — is added back here so the next project starts further ahead. The first domain target is radio-astronomy RFI work; radar and remote-sensing pipelines come later.
+The idea: domain projects are forked from this repo, and whatever they need generically — pipeline plumbing, signal-processing steps, review loops — is added back here so the next project starts further ahead. The first domain we are looking at is radio-astronomy RFI work. Whether that leads anywhere depends on real data and real partners.
 
 It is not an ML platform yet. It is the chassis.
 
@@ -45,19 +45,19 @@ raw signal / dump / log
    audit trail + downstream output
 ```
 
-Two hypotheses are being explored on top of this foundation.
+Two directions are being explored on top of this foundation. Both are open questions, not plans.
 
-### Hypothesis 1 — RFI detection for radio astronomy
+### Direction 1 — RFI review for radio astronomy
 
-Radio-astronomy observations are often contaminated by human-made RF interference. Can lightweight ML classifiers, trained on operator-labelled spectrograms, flag suspect regions and hand them to a human for the final keep / quarantine decision? The goal is not to replace the astronomer; it is to make the review loop faster and reproducible.
+Radio-astronomy observations are contaminated by human-made interference, and telling interference from a real spectral line is hard. Can a reproducible baseline plus a small model, with an astronomer reviewing the flags, make that step faster and traceable? The astronomer stays in charge of the decision.
 
-This is exploration, not a shipped product.
+Exploration only. No model, no data, no result yet.
 
-### Hypothesis 2 — Scalable processing with Dask on HPC
+### Direction 2 — Radio-astronomy pipelines on HPC
 
-Correlation and post-processing for large radio-astronomy datasets are traditionally MPI-based. Can Dask handle the same workloads? Port one representative step, benchmark against OpenMPI, document where each approach makes sense.
+Post-correlation processing for radio astronomy is traditionally MPI-based; newer pipelines are being written in Dask. Can an existing reduction chain run end-to-end on an HPC system from containers, with each step measured in both frameworks, so the trade-offs are documented rather than assumed?
 
-This is research, not a finished pipeline.
+Research only. Nothing runs yet.
 
 ## Why the foundation comes first
 
@@ -87,6 +87,10 @@ npm run dev
 ```
 
 Full setup: [docs/starter-pack/DEV_BOOTSTRAP.md](docs/starter-pack/DEV_BOOTSTRAP.md). Operator runbooks: [docs/utils/](docs/utils/README.md).
+
+## Corpus and planning
+
+Sourced facts about the first domain we are studying — the Irbene radio telescopes and the LUMI supercomputer — live in [corpus/](corpus/irbene/README.md). Findings and plans for that work are in [docs/virac/](docs/virac/README.md). They describe what exists and what we are considering; they are not commitments.
 
 ## Contact
 
